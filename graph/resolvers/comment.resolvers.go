@@ -19,6 +19,10 @@ func (r *commentResolver) News(ctx context.Context, obj *models.Comment) (*model
 	return &mocked_data.MockNews1, nil
 }
 
+func (r *commentResolver) IPAddress(ctx context.Context, obj *models.Comment) (string, error) {
+	return "192.168.0.1", nil
+}
+
 func (r *queryResolver) Comment(ctx context.Context) (*models.Comment, error) {
 	return &mocked_data.CommentMock1, nil
 }

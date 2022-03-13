@@ -49,6 +49,7 @@ type ComplexityRoot struct {
 		CreatedBy   func(childComplexity int) int
 		CreatedById func(childComplexity int) int
 		ID          func(childComplexity int) int
+		IPAddress   func(childComplexity int) int
 		News        func(childComplexity int) int
 		NewsId      func(childComplexity int) int
 		Text        func(childComplexity int) int
@@ -86,6 +87,7 @@ type ComplexityRoot struct {
 type CommentResolver interface {
 	CreatedBy(ctx context.Context, obj *models.Comment) (*models.User, error)
 	News(ctx context.Context, obj *models.Comment) (*models.News, error)
+	IPAddress(ctx context.Context, obj *models.Comment) (string, error)
 }
 type NewsResolver interface {
 	CreatedBy(ctx context.Context, obj *models.News) (*models.User, error)
@@ -143,6 +145,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Comment.ID(childComplexity), true
+
+	case "Comment.ipAddress":
+		if e.complexity.Comment.IPAddress == nil {
+			break
+		}
+
+		return e.complexity.Comment.IPAddress(childComplexity), true
 
 	case "Comment.news":
 		if e.complexity.Comment.News == nil {
@@ -356,6 +365,7 @@ var sources = []*ast.Source{
   createdAt: String!
   createdBy: User!
   news: News!
+  ipAddress: String!
 }
 
 extend type Query {
@@ -695,6 +705,41 @@ func (ec *executionContext) _Comment_news(ctx context.Context, field graphql.Col
 	res := resTmp.(*models.News)
 	fc.Result = res
 	return ec.marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋmodelsᚐNews(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Comment_ipAddress(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Comment",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Comment().IPAddress(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _News_id(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
@@ -2705,6 +2750,26 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 					}
 				}()
 				res = ec._Comment_news(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "ipAddress":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Comment_ipAddress(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

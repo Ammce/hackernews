@@ -6,6 +6,7 @@ type Comment {
   createdAt: String!
   createdBy: User!
   news: News!
+  ipAddress: String!
 }
 
 extend type Query {

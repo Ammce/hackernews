@@ -59,3 +59,6 @@ models:
     model: github.com/Ammce/hackernews/models.News
   Comment:
     model: github.com/Ammce/hackernews/models.Comment
+    fields:
+      ipAddress:
+        resolver: true
