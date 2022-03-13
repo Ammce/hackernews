@@ -1,3 +1,7 @@
 type Query {
   healthcheck: String!
 }
+
+type Mutation {
+  healtcheckMutation(str: String!): String!
+}

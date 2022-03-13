@@ -4,7 +4,16 @@ type User {
   email: String!
 }
 
+input UserInput {
+  name: String!
+  email: String!
+}
+
 extend type Query {
   user: User!
   users: [User!]
+}
+
+extend type Mutation {
+  createUser(input: UserInput): User!
 }
