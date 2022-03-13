@@ -1,11 +1,11 @@
 type Comment {
   id: ID!
   text: String!
-  CreatedById: ID!
-  NewsId: ID!
-  CreatedAt: String!
-  CreatedBy: User!
-  News: News!
+  createdById: ID!
+  newsId: ID!
+  createdAt: String!
+  createdBy: User!
+  news: News!
 }
 
 extend type Query {

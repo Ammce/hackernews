@@ -3,9 +3,10 @@ type News {
   title: String!
   text: String!
   published: Boolean!
-  CreatedById: ID!
-  CreatedAt: String!
-  CreatedBy: User!
+  createdById: ID!
+  createdAt: String!
+  createdBy: User!
+  comments: [Comment!]
 }
 
 extend type Query {

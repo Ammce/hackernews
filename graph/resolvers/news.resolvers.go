@@ -15,6 +15,16 @@ func (r *newsResolver) CreatedBy(ctx context.Context, obj *models.News) (*models
 	return &mocked_data.MockUser, nil
 }
 
+func (r *newsResolver) Comments(ctx context.Context, obj *models.News) ([]*models.Comment, error) {
+	var currentModels []*models.Comment
+	for _, d := range mocked_data.AllComments {
+		if d.NewsId == obj.ID {
+			currentModels = append(currentModels, d)
+		}
+	}
+	return currentModels, nil
+}
+
 func (r *queryResolver) News(ctx context.Context) (*models.News, error) {
 	return &mocked_data.MockNews1, nil
 }

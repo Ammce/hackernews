@@ -55,6 +55,7 @@ type ComplexityRoot struct {
 	}
 
 	News struct {
+		Comments    func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
 		CreatedBy   func(childComplexity int) int
 		CreatedById func(childComplexity int) int
@@ -86,6 +87,7 @@ type CommentResolver interface {
 }
 type NewsResolver interface {
 	CreatedBy(ctx context.Context, obj *models.News) (*models.User, error)
+	Comments(ctx context.Context, obj *models.News) ([]*models.Comment, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context) (*models.User, error)
@@ -111,21 +113,21 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Comment.CreatedAt":
+	case "Comment.createdAt":
 		if e.complexity.Comment.CreatedAt == nil {
 			break
 		}
 
 		return e.complexity.Comment.CreatedAt(childComplexity), true
 
-	case "Comment.CreatedBy":
+	case "Comment.createdBy":
 		if e.complexity.Comment.CreatedBy == nil {
 			break
 		}
 
 		return e.complexity.Comment.CreatedBy(childComplexity), true
 
-	case "Comment.CreatedById":
+	case "Comment.createdById":
 		if e.complexity.Comment.CreatedById == nil {
 			break
 		}
@@ -139,14 +141,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.ID(childComplexity), true
 
-	case "Comment.News":
+	case "Comment.news":
 		if e.complexity.Comment.News == nil {
 			break
 		}
 
 		return e.complexity.Comment.News(childComplexity), true
 
-	case "Comment.NewsId":
+	case "Comment.newsId":
 		if e.complexity.Comment.NewsId == nil {
 			break
 		}
@@ -160,21 +162,28 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.Text(childComplexity), true
 
-	case "News.CreatedAt":
+	case "News.comments":
+		if e.complexity.News.Comments == nil {
+			break
+		}
+
+		return e.complexity.News.Comments(childComplexity), true
+
+	case "News.createdAt":
 		if e.complexity.News.CreatedAt == nil {
 			break
 		}
 
 		return e.complexity.News.CreatedAt(childComplexity), true
 
-	case "News.CreatedBy":
+	case "News.createdBy":
 		if e.complexity.News.CreatedBy == nil {
 			break
 		}
 
 		return e.complexity.News.CreatedBy(childComplexity), true
 
-	case "News.CreatedById":
+	case "News.createdById":
 		if e.complexity.News.CreatedById == nil {
 			break
 		}
@@ -325,11 +334,11 @@ var sources = []*ast.Source{
 	{Name: "graph/graphql/comment.graphqls", Input: `type Comment {
   id: ID!
   text: String!
-  CreatedById: ID!
-  NewsId: ID!
-  CreatedAt: String!
-  CreatedBy: User!
-  News: News!
+  createdById: ID!
+  newsId: ID!
+  createdAt: String!
+  createdBy: User!
+  news: News!
 }
 
 extend type Query {
@@ -342,9 +351,10 @@ extend type Query {
   title: String!
   text: String!
   published: Boolean!
-  CreatedById: ID!
-  CreatedAt: String!
-  CreatedBy: User!
+  createdById: ID!
+  createdAt: String!
+  createdBy: User!
+  comments: [Comment!]
 }
 
 extend type Query {
@@ -493,7 +503,7 @@ func (ec *executionContext) _Comment_text(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Comment_CreatedById(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
+func (ec *executionContext) _Comment_createdById(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -528,7 +538,7 @@ func (ec *executionContext) _Comment_CreatedById(ctx context.Context, field grap
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Comment_NewsId(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
+func (ec *executionContext) _Comment_newsId(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -563,7 +573,7 @@ func (ec *executionContext) _Comment_NewsId(ctx context.Context, field graphql.C
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Comment_CreatedAt(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
+func (ec *executionContext) _Comment_createdAt(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -598,7 +608,7 @@ func (ec *executionContext) _Comment_CreatedAt(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Comment_CreatedBy(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
+func (ec *executionContext) _Comment_createdBy(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -633,7 +643,7 @@ func (ec *executionContext) _Comment_CreatedBy(ctx context.Context, field graphq
 	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Comment_News(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
+func (ec *executionContext) _Comment_news(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -808,7 +818,7 @@ func (ec *executionContext) _News_published(ctx context.Context, field graphql.C
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _News_CreatedById(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
+func (ec *executionContext) _News_createdById(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -843,7 +853,7 @@ func (ec *executionContext) _News_CreatedById(ctx context.Context, field graphql
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _News_CreatedAt(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
+func (ec *executionContext) _News_createdAt(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -878,7 +888,7 @@ func (ec *executionContext) _News_CreatedAt(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _News_CreatedBy(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
+func (ec *executionContext) _News_createdBy(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -911,6 +921,38 @@ func (ec *executionContext) _News_CreatedBy(ctx context.Context, field graphql.C
 	res := resTmp.(*models.User)
 	fc.Result = res
 	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋmodelsᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _News_comments(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "News",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.News().Comments(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Comment)
+	fc.Result = res
+	return ec.marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋmodelsᚐCommentᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2514,9 +2556,9 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "CreatedById":
+		case "createdById":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Comment_CreatedById(ctx, field, obj)
+				return ec._Comment_createdById(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -2524,9 +2566,9 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "NewsId":
+		case "newsId":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Comment_NewsId(ctx, field, obj)
+				return ec._Comment_newsId(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -2534,9 +2576,9 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "CreatedAt":
+		case "createdAt":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Comment_CreatedAt(ctx, field, obj)
+				return ec._Comment_createdAt(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -2544,7 +2586,7 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "CreatedBy":
+		case "createdBy":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -2553,7 +2595,7 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Comment_CreatedBy(ctx, field, obj)
+				res = ec._Comment_createdBy(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2564,7 +2606,7 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 				return innerFunc(ctx)
 
 			})
-		case "News":
+		case "news":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -2573,7 +2615,7 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Comment_News(ctx, field, obj)
+				res = ec._Comment_news(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2645,9 +2687,9 @@ func (ec *executionContext) _News(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "CreatedById":
+		case "createdById":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._News_CreatedById(ctx, field, obj)
+				return ec._News_createdById(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -2655,9 +2697,9 @@ func (ec *executionContext) _News(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "CreatedAt":
+		case "createdAt":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._News_CreatedAt(ctx, field, obj)
+				return ec._News_createdAt(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -2665,7 +2707,7 @@ func (ec *executionContext) _News(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "CreatedBy":
+		case "createdBy":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -2674,10 +2716,27 @@ func (ec *executionContext) _News(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._News_CreatedBy(ctx, field, obj)
+				res = ec._News_createdBy(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "comments":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._News_comments(ctx, field, obj)
 				return res
 			}
 
