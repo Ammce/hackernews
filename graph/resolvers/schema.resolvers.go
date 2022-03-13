@@ -21,21 +21,11 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 }
 
 func (r *queryResolver) Todos(ctx context.Context) ([]*models.Todo, error) {
-	return []*models.Todo{
-		{
-			ID:   "abc-123",
-			Text: "hello",
-			Done: false,
-		},
-	}, nil
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *todoResolver) User(ctx context.Context, obj *models.Todo) (*models.User, error) {
-	fmt.Println(obj)
-	return &models.User{
-		Name: "Amel",
-		ID:   "224",
-	}, nil
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *todoResolver) Comments(ctx context.Context, obj *models.Todo) ([]*models.Comment, error) {
@@ -43,13 +33,7 @@ func (r *todoResolver) Comments(ctx context.Context, obj *models.Todo) ([]*model
 }
 
 func (r *userResolver) Todos(ctx context.Context, obj *models.User) ([]*models.Todo, error) {
-	return []*models.Todo{
-		{
-			ID:   "abc-224",
-			Text: "hello",
-			Done: false,
-		},
-	}, nil
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Comment returns generated.CommentResolver implementation.
