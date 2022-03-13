@@ -7,12 +7,19 @@ type Todo {
   text: String!
   done: Boolean!
   user: User!
+  comments: [Comment!]
 }
 
 type User {
   id: ID!
   name: String!
   todos: [Todo!]
+}
+
+type Comment {
+  id: ID!
+  text: String!
+  commentBy: User!
 }
 
 type Query {

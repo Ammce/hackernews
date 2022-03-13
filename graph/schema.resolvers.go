@@ -34,6 +34,10 @@ func (r *todoResolver) User(ctx context.Context, obj *models.Todo) (*models.User
 	}, nil
 }
 
+func (r *todoResolver) Comments(ctx context.Context, obj *models.Todo) ([]*models.Comment, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *userResolver) Todos(ctx context.Context, obj *models.User) ([]*models.Todo, error) {
 	return []*models.Todo{
 		{

@@ -17,6 +17,8 @@ model:
   filename: graph/model/models_gen.go
   package: model
 
+
+
 # Where should the resolver implementations go?
 resolver:
   layout: follow-schema
@@ -54,3 +56,9 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+  User:
+    model: github.com/Ammce/hackernews/models.User
+  Todo:
+    model: github.com/Ammce/hackernews/models.Todo
+  Comment:
+    model: github.com/Ammce/hackernews/models.Comment
