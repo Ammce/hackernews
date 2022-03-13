@@ -5,18 +5,18 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Ammce/hackernews/graph/generated"
+	mocked_data "github.com/Ammce/hackernews/mock"
 	"github.com/Ammce/hackernews/models"
 )
 
 func (r *queryResolver) User(ctx context.Context) (*models.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &mocked_data.MockUser, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return []*models.User{&mocked_data.MockUser}, nil
 }
 
 // Query returns generated.QueryResolver implementation.
