@@ -1,0 +1,14 @@
+type News {
+  id: ID!
+  title: String!
+  text: String!
+  published: Boolean!
+  CreatedById: ID!
+  CreatedAt: String!
+  CreatedBy: User!
+}
+
+extend type Query {
+  news: News!
+  allNews: [News!]
+}

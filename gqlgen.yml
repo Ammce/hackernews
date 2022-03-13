@@ -12,10 +12,7 @@ exec:
 #   filename: graph/generated/federation.go
 #   package: generated
 
-# Where should any generated models go?
-model:
-  filename: graph/model/models_gen.go
-  package: model
+
 
 
 
@@ -58,7 +55,7 @@ models:
       - github.com/99designs/gqlgen/graphql.Int32
   User:
     model: github.com/Ammce/hackernews/models.User
-  Todo:
-    model: github.com/Ammce/hackernews/models.Todo
+  News:
+    model: github.com/Ammce/hackernews/models.News
   Comment:
     model: github.com/Ammce/hackernews/models.Comment
