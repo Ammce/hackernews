@@ -36,6 +36,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Comment() CommentResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 	Todo() TodoResolver
@@ -47,8 +48,9 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Comment struct {
-		ID   func(childComplexity int) int
-		Text func(childComplexity int) int
+		CommentBy func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Text      func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -74,6 +76,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type CommentResolver interface {
+	CommentBy(ctx context.Context, obj *models.Comment) (*models.User, error)
+}
 type MutationResolver interface {
 	CreateTodo(ctx context.Context, input model.NewTodo) (*models.Todo, error)
 }
@@ -102,6 +107,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Comment.commentBy":
+		if e.complexity.Comment.CommentBy == nil {
+			break
+		}
+
+		return e.complexity.Comment.CommentBy(childComplexity), true
 
 	case "Comment.id":
 		if e.complexity.Comment.ID == nil {
@@ -277,6 +289,7 @@ type User {
 type Comment {
   id: ID!
   text: String!
+  commentBy: User!
 }
 
 type Query {
@@ -435,6 +448,41 @@ func (ec *executionContext) _Comment_text(ctx context.Context, field graphql.Col
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Comment_commentBy(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Comment",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Comment().CommentBy(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2102,7 +2150,7 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "text":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -2112,8 +2160,28 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "commentBy":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Comment_commentBy(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

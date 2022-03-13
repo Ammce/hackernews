@@ -12,6 +12,10 @@ import (
 	"github.com/Ammce/hackernews/models"
 )
 
+func (r *commentResolver) CommentBy(ctx context.Context, obj *models.Comment) (*models.User, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*models.Todo, error) {
 	panic(fmt.Errorf("not implemented"))
 }
@@ -48,6 +52,9 @@ func (r *userResolver) Todos(ctx context.Context, obj *models.User) ([]*models.T
 	}, nil
 }
 
+// Comment returns generated.CommentResolver implementation.
+func (r *Resolver) Comment() generated.CommentResolver { return &commentResolver{r} }
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
@@ -60,6 +67,7 @@ func (r *Resolver) Todo() generated.TodoResolver { return &todoResolver{r} }
 // User returns generated.UserResolver implementation.
 func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
+type commentResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type todoResolver struct{ *Resolver }
