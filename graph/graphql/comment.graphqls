@@ -1,0 +1,14 @@
+type Comment {
+  id: ID!
+  text: String!
+  CreatedById: ID!
+  NewsId: ID!
+  CreatedAt: String!
+  CreatedBy: User!
+  News: News!
+}
+
+extend type Query {
+  comment: Comment!
+  comments: [Comment!]
+}

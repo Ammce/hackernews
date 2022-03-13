@@ -8,6 +8,24 @@ var MockUser = models.User{
 	Email: "amcenp@gmail.com",
 }
 
+var CommentMock1 = models.Comment{
+	ID:          "224",
+	NewsId:      "345",
+	Text:        "This is serious",
+	CreatedById: "123",
+	CreatedAt:   "21/10/2022",
+}
+
+var CommentMock2 = models.Comment{
+	ID:          "224",
+	NewsId:      "345",
+	Text:        "What the hell",
+	CreatedById: "123",
+	CreatedAt:   "21/10/2022",
+}
+
+var AllComments = []*models.Comment{&CommentMock1, &CommentMock2}
+
 var MockNews1 = models.News{
 	ID:          "345",
 	Title:       "Russia attacks Ukraine",
