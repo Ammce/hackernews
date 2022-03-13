@@ -15,6 +15,10 @@ func (r *newsResolver) CreatedBy(ctx context.Context, obj *models.News) (*models
 	return &mocked_data.MockUser, nil
 }
 
+func (r *newsResolver) ApprovedBy(ctx context.Context, obj *models.News) (*models.User, error) {
+	return &mocked_data.MockUser, nil
+}
+
 func (r *newsResolver) Comments(ctx context.Context, obj *models.News) ([]*models.Comment, error) {
 	var currentModels []*models.Comment
 	for _, d := range mocked_data.AllComments {

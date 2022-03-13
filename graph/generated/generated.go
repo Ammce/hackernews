@@ -55,14 +55,16 @@ type ComplexityRoot struct {
 	}
 
 	News struct {
-		Comments    func(childComplexity int) int
-		CreatedAt   func(childComplexity int) int
-		CreatedBy   func(childComplexity int) int
-		CreatedById func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Published   func(childComplexity int) int
-		Text        func(childComplexity int) int
-		Title       func(childComplexity int) int
+		ApprovedBy   func(childComplexity int) int
+		ApprovedById func(childComplexity int) int
+		Comments     func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		CreatedBy    func(childComplexity int) int
+		CreatedById  func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Published    func(childComplexity int) int
+		Text         func(childComplexity int) int
+		Title        func(childComplexity int) int
 	}
 
 	Query struct {
@@ -87,6 +89,7 @@ type CommentResolver interface {
 }
 type NewsResolver interface {
 	CreatedBy(ctx context.Context, obj *models.News) (*models.User, error)
+	ApprovedBy(ctx context.Context, obj *models.News) (*models.User, error)
 	Comments(ctx context.Context, obj *models.News) ([]*models.Comment, error)
 }
 type QueryResolver interface {
@@ -161,6 +164,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Comment.Text(childComplexity), true
+
+	case "News.approvedBy":
+		if e.complexity.News.ApprovedBy == nil {
+			break
+		}
+
+		return e.complexity.News.ApprovedBy(childComplexity), true
+
+	case "News.approvedById":
+		if e.complexity.News.ApprovedById == nil {
+			break
+		}
+
+		return e.complexity.News.ApprovedById(childComplexity), true
 
 	case "News.comments":
 		if e.complexity.News.Comments == nil {
@@ -352,8 +369,10 @@ extend type Query {
   text: String!
   published: Boolean!
   createdById: ID!
+  approvedById: ID!
   createdAt: String!
   createdBy: User!
+  approvedBy: User!
   comments: [Comment!]
 }
 
@@ -853,6 +872,41 @@ func (ec *executionContext) _News_createdById(ctx context.Context, field graphql
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _News_approvedById(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "News",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ApprovedById, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _News_createdAt(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -907,6 +961,41 @@ func (ec *executionContext) _News_createdBy(ctx context.Context, field graphql.C
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.News().CreatedBy(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋmodelsᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _News_approvedBy(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "News",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.News().ApprovedBy(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2697,6 +2786,16 @@ func (ec *executionContext) _News(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "approvedById":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._News_approvedById(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "createdAt":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._News_createdAt(ctx, field, obj)
@@ -2717,6 +2816,26 @@ func (ec *executionContext) _News(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._News_createdBy(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "approvedBy":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._News_approvedBy(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

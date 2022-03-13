@@ -4,8 +4,10 @@ type News {
   text: String!
   published: Boolean!
   createdById: ID!
+  approvedById: ID!
   createdAt: String!
   createdBy: User!
+  approvedBy: User!
   comments: [Comment!]
 }
 

@@ -27,21 +27,23 @@ var CommentMock2 = models.Comment{
 var AllComments = []*models.Comment{&CommentMock1, &CommentMock2}
 
 var MockNews1 = models.News{
-	ID:          "345",
-	Title:       "Russia attacks Ukraine",
-	Text:        "Russia is about to attack Kyiv and all other major cities in Ukraine.",
-	CreatedById: "123",
-	CreatedAt:   "20/10/2022",
-	Published:   true,
+	ID:           "345",
+	Title:        "Russia attacks Ukraine",
+	Text:         "Russia is about to attack Kyiv and all other major cities in Ukraine.",
+	CreatedById:  "123",
+	CreatedAt:    "20/10/2022",
+	Published:    true,
+	ApprovedById: "123",
 }
 
 var MockNews2 = models.News{
-	ID:          "555",
-	Title:       "Dol;ar is rising",
-	Text:        "Due to the war crimes, dollar is rising up.",
-	CreatedById: "123",
-	CreatedAt:   "20/10/2022",
-	Published:   false,
+	ID:           "555",
+	Title:        "Dol;ar is rising",
+	Text:         "Due to the war crimes, dollar is rising up.",
+	CreatedById:  "123",
+	CreatedAt:    "20/10/2022",
+	Published:    false,
+	ApprovedById: "123",
 }
 
 var News = []*models.News{&MockNews1, &MockNews2}
