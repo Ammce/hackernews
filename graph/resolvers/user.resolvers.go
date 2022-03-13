@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 
-	"github.com/Ammce/hackernews/graph/generated"
 	mocked_data "github.com/Ammce/hackernews/mock"
 	"github.com/Ammce/hackernews/models"
 )
@@ -18,8 +17,3 @@ func (r *queryResolver) User(ctx context.Context) (*models.User, error) {
 func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
 	return []*models.User{&mocked_data.MockUser}, nil
 }
-
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
-
-type queryResolver struct{ *Resolver }

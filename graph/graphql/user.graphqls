@@ -4,7 +4,7 @@ type User {
   email: String!
 }
 
-type Query {
+extend type Query {
   user: User!
   users: [User!]
 }
