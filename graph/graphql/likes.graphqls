@@ -1,8 +1,0 @@
-type Likes {
-  id: ID!
-  name: String!
-}
-
-extend type Query {
-  likes: [Likes!]!
-}
