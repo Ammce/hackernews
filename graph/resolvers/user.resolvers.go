@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	mocked_data "github.com/Ammce/hackernews/mock"
 	"github.com/Ammce/hackernews/models"
@@ -13,7 +12,10 @@ import (
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *inputs.UserInput) (*models.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &models.User{
+		Name:  r.Name,
+		Email: input.Email,
+	}, nil
 }
 
 func (r *queryResolver) User(ctx context.Context) (*models.User, error) {
