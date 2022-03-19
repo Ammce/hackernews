@@ -2,6 +2,6 @@ package inputs
 
 type UserInput struct {
 	Email    string
-	Name     string
+	Username string
 	Password string
 }

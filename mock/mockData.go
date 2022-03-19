@@ -3,9 +3,9 @@ package mocked_data
 import "github.com/Ammce/hackernews/graph/models"
 
 var MockUser = models.User{
-	ID:    "123",
-	Name:  "Amel Muminovic",
-	Email: "amcenp@gmail.com",
+	ID:       "123",
+	Username: "Amel Muminovic",
+	Email:    "amcenp@gmail.com",
 }
 
 var CommentMock1 = models.Comment{

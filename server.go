@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -10,17 +11,16 @@ import (
 	"github.com/Ammce/hackernews/graph/generated"
 	graph "github.com/Ammce/hackernews/graph/resolvers"
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 )
 
 const defaultPort = ":8080"
 
 // Defining the Graphql handler
-func graphqlHandler() gin.HandlerFunc {
+func graphqlHandler(db *sql.DB) gin.HandlerFunc {
 	// NewExecutableSchema and Config are in the generated.go file
 	// Resolver is in the resolver.go file
-	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{
-		Name: "Amcelottiiiii",
-	}}))
+	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db}}))
 
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)
@@ -42,8 +42,16 @@ func main() {
 		port = defaultPort
 	}
 
+	// db := postgres.DatabaseConfig()
+	connStr := "postgres://postgres:postgres@docker.for.mac.localhost:5433/news?sslmode=disable"
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
 	r := gin.Default()
-	r.POST("/query", graphqlHandler())
+	r.POST("/query", graphqlHandler(db))
 	r.GET("/", playgroundHandler())
 	r.Run(defaultPort)
 

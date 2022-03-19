@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"log"
 
 	"github.com/Ammce/hackernews/graph/models"
 	"github.com/Ammce/hackernews/graph/models/inputs"
@@ -13,7 +14,7 @@ import (
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *inputs.UserInput) (*models.User, error) {
 	return &models.User{
-		Name:     input.Name,
+		Username: input.Username,
 		Email:    input.Email,
 		Password: input.Password,
 	}, nil
@@ -24,5 +25,32 @@ func (r *queryResolver) User(ctx context.Context) (*models.User, error) {
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
-	return []*models.User{&mocked_data.MockUser}, nil
+	sqlStatement := `SELECT id, username, email FROM users;`
+
+	var users []*models.User
+
+	rows, err := r.DB.Query(sqlStatement)
+
+	if err != nil {
+		log.Fatalf("Unable to execute the query. %v", err)
+	}
+
+	for rows.Next() {
+		var user models.User
+
+		// unmarshal the row object to user
+		err = rows.Scan(&user.ID, &user.Username, &user.Email)
+
+		if err != nil {
+			log.Fatalf("Unable to scan the row. %v", err)
+		}
+
+		// append the user in the users slice
+		users = append(users, &user)
+
+	}
+
+	defer rows.Close()
+
+	return users, nil
 }
