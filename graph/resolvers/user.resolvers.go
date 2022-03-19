@@ -6,9 +6,9 @@ package graph
 import (
 	"context"
 
+	"github.com/Ammce/hackernews/graph/models"
+	"github.com/Ammce/hackernews/graph/models/inputs"
 	mocked_data "github.com/Ammce/hackernews/mock"
-	"github.com/Ammce/hackernews/models"
-	"github.com/Ammce/hackernews/models/inputs"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *inputs.UserInput) (*models.User, error) {

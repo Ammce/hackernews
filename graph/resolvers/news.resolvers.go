@@ -7,8 +7,8 @@ import (
 	"context"
 
 	"github.com/Ammce/hackernews/graph/generated"
+	"github.com/Ammce/hackernews/graph/models"
 	mocked_data "github.com/Ammce/hackernews/mock"
-	"github.com/Ammce/hackernews/models"
 )
 
 func (r *newsResolver) CreatedBy(ctx context.Context, obj *models.News) (*models.User, error) {

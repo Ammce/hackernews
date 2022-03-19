@@ -32,7 +32,7 @@ resolver:
 # skip_validation: true
 
 # model:
-#   filename: graph/model/models_gen.go
+#   filename: graph/model/graph/models_gen.go
 #   package: model
 
 # gqlgen will search for any type names in the schema in these go packages
@@ -58,13 +58,13 @@ models:
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
   User:
-    model: github.com/Ammce/hackernews/models.User
+    model: github.com/Ammce/hackernews/graph/models.User
   UserInput:
-    model: github.com/Ammce/hackernews/models/inputs.UserInput
+    model: github.com/Ammce/hackernews/graph/models/inputs.UserInput
   News:
-    model: github.com/Ammce/hackernews/models.News
+    model: github.com/Ammce/hackernews/graph/models.News
   Comment:
-    model: github.com/Ammce/hackernews/models.Comment
+    model: github.com/Ammce/hackernews/graph/models.Comment
     fields:
       ipAddress:
         resolver: true

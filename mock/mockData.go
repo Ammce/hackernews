@@ -1,6 +1,6 @@
 package mocked_data
 
-import "github.com/Ammce/hackernews/models"
+import "github.com/Ammce/hackernews/graph/models"
 
 var MockUser = models.User{
 	ID:    "123",
