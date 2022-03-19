@@ -466,6 +466,7 @@ extend type Query {
 input UserInput {
   name: String!
   email: String!
+  password: String!
 }
 
 extend type Query {
@@ -2898,6 +2899,14 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
 			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "password":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			it.Password, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

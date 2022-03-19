@@ -13,8 +13,9 @@ import (
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *inputs.UserInput) (*models.User, error) {
 	return &models.User{
-		Name:  r.Name,
-		Email: input.Email,
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: input.Password,
 	}, nil
 }
 
