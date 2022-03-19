@@ -19,7 +19,7 @@ func graphqlHandler() gin.HandlerFunc {
 	// NewExecutableSchema and Config are in the generated.go file
 	// Resolver is in the resolver.go file
 	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{
-		Name: "Amcelo",
+		Name: "Amcelottiiiii",
 	}}))
 
 	return func(c *gin.Context) {

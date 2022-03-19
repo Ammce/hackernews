@@ -1,0 +1,14 @@
+version: '3'
+
+services: 
+  api:
+    image: cosmtrek/air
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/go/src/app
+    command: air
