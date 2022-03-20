@@ -10,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/Ammce/hackernews/adapters/graph/generated"
 	graph "github.com/Ammce/hackernews/adapters/graph/resolvers"
+	repositories "github.com/Ammce/hackernews/adapters/postgres/repository"
 	"github.com/Ammce/hackernews/domain/user"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -21,8 +22,8 @@ const defaultPort = ":8080"
 func graphqlHandler(db *sql.DB) gin.HandlerFunc {
 	// NewExecutableSchema and Config are in the generated.go file
 	// Resolver is in the resolver.go file
-
-	userService := user.UserServiceImpl{}
+	userRepo := repositories.UserRepositoryImpl{}
+	userService := user.UserServiceImpl{UserRepo: userRepo}
 
 	domain := graph.DomainGraphQL{
 		UserService: userService,
