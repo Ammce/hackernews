@@ -1,5 +1,5 @@
 package user
 
 type UserRepository interface {
-	SaveUser(User) User
+	SaveUser(*User) (*User, error)
 }

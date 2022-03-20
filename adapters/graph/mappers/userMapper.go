@@ -6,8 +6,8 @@ import (
 	"github.com/Ammce/hackernews/domain/user"
 )
 
-func UserInputToUserDomain(userInput *inputs.UserInput) user.User {
-	return user.User{
+func UserInputToUserDomain(userInput *inputs.UserInput) *user.User {
+	return &user.User{
 		Email:    userInput.Email,
 		Username: userInput.Username,
 		Password: userInput.Password,

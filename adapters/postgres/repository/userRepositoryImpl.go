@@ -11,11 +11,11 @@ type UserRepositoryImpl struct {
 	DB *sql.DB
 }
 
-func (ur UserRepositoryImpl) SaveUser(u user.User) user.User {
+func (ur UserRepositoryImpl) SaveUser(u *user.User) (*user.User, error) {
 	fmt.Println("Trying to save user...")
-	return user.User{
+	return &user.User{
 		Username: "Ammce",
 		Email:    "amcenp@gmail.com",
 		ID:       "001",
-	}
+	}, nil
 }
