@@ -11,7 +11,14 @@ type News {
   comments: [Comment!]
 }
 
+input NewsInput {
+  title: String!
+  text: String!
+  createdById: ID!
+}
+
 extend type Query {
   news: News!
   allNews: [News!]
+  createNews(input: NewsInput!): News!
 }

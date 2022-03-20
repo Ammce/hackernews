@@ -63,6 +63,8 @@ models:
     model: github.com/Ammce/hackernews/adapters/graph/models/inputs.UserInput
   News:
     model: github.com/Ammce/hackernews/adapters/graph/models.News
+  NewsInput:
+    model: github.com/Ammce/hackernews/adapters/graph/models/inputs.NewsInput
   Comment:
     model: github.com/Ammce/hackernews/adapters/graph/models.Comment
     fields:

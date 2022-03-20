@@ -5,9 +5,11 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Ammce/hackernews/adapters/graph/generated"
 	"github.com/Ammce/hackernews/adapters/graph/models"
+	"github.com/Ammce/hackernews/adapters/graph/models/inputs"
 	mocked_data "github.com/Ammce/hackernews/mock"
 )
 
@@ -35,6 +37,10 @@ func (r *queryResolver) News(ctx context.Context) (*models.News, error) {
 
 func (r *queryResolver) AllNews(ctx context.Context) ([]*models.News, error) {
 	return mocked_data.News, nil
+}
+
+func (r *queryResolver) CreateNews(ctx context.Context, input inputs.NewsInput) (*models.News, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // News returns generated.NewsResolver implementation.

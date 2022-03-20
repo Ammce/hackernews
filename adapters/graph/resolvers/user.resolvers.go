@@ -24,7 +24,6 @@ func (r *queryResolver) User(ctx context.Context) (*models.User, error) {
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
-
 	sqlStatement := `SELECT id, username, email FROM users;`
 
 	var users []*models.User

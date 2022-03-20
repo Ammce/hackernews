@@ -79,6 +79,7 @@ type ComplexityRoot struct {
 		AllNews     func(childComplexity int) int
 		Comment     func(childComplexity int) int
 		Comments    func(childComplexity int) int
+		CreateNews  func(childComplexity int, input inputs.NewsInput) int
 		Healthcheck func(childComplexity int) int
 		News        func(childComplexity int) int
 		User        func(childComplexity int) int
@@ -112,6 +113,7 @@ type QueryResolver interface {
 	Comments(ctx context.Context) ([]*models.Comment, error)
 	News(ctx context.Context) (*models.News, error)
 	AllNews(ctx context.Context) ([]*models.News, error)
+	CreateNews(ctx context.Context, input inputs.NewsInput) (*models.News, error)
 	User(ctx context.Context) (*models.User, error)
 	Users(ctx context.Context) ([]*models.User, error)
 }
@@ -302,6 +304,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Comments(childComplexity), true
 
+	case "Query.createNews":
+		if e.complexity.Query.CreateNews == nil {
+			break
+		}
+
+		args, err := ec.field_Query_createNews_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CreateNews(childComplexity, args["input"].(inputs.NewsInput)), true
+
 	case "Query.healthcheck":
 		if e.complexity.Query.Healthcheck == nil {
 			break
@@ -452,9 +466,16 @@ type Mutation {
   comments: [Comment!]
 }
 
+input NewsInput {
+  title: String!
+  text: String!
+  createdById: ID!
+}
+
 extend type Query {
   news: News!
   allNews: [News!]
+  createNews(input: NewsInput!): News!
 }
 `, BuiltIn: false},
 	{Name: "adapters/graph/graphql/user.graphqls", Input: `type User {
@@ -527,6 +548,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_createNews_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 inputs.NewsInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewsInput2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐNewsInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -1446,6 +1482,48 @@ func (ec *executionContext) _Query_allNews(ctx context.Context, field graphql.Co
 	res := resTmp.([]*models.News)
 	fc.Result = res
 	return ec.marshalONews2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNewsᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_createNews(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_createNews_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CreateNews(rctx, args["input"].(inputs.NewsInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.News)
+	fc.Result = res
+	return ec.marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNews(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2877,6 +2955,45 @@ func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field gr
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputNewsInput(ctx context.Context, obj interface{}) (inputs.NewsInput, error) {
+	var it inputs.NewsInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "text":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
+			it.Text, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdById":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdById"))
+			it.CreatedById, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj interface{}) (inputs.UserInput, error) {
 	var it inputs.UserInput
 	asMap := map[string]interface{}{}
@@ -3371,6 +3488,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_allNews(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "createNews":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_createNews(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			}
 
@@ -3979,6 +4119,11 @@ func (ec *executionContext) marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋ
 		return graphql.Null
 	}
 	return ec._News(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNNewsInput2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐNewsInput(ctx context.Context, v interface{}) (inputs.NewsInput, error) {
+	res, err := ec.unmarshalInputNewsInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
