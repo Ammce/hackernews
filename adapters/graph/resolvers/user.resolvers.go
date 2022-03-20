@@ -16,7 +16,7 @@ import (
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *inputs.UserInput) (*models.User, error) {
 	mappedUserInput := mappers.UserInputToUserDomain(input)
-	domainUser, _ := r.Domain.userService.CreateUser(mappedUserInput)
+	domainUser, _ := r.Domain.UserService.CreateUser(mappedUserInput)
 	return mappers.UserDomainToUserGraphQL(domainUser), nil
 }
 
@@ -26,7 +26,7 @@ func (r *queryResolver) User(ctx context.Context) (*models.User, error) {
 
 func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
 
-	r.Domain.userService.CreateUser(user.User{ID: "123", Email: "amcenp", Username: "ammce"})
+	r.Domain.UserService.CreateUser(user.User{ID: "123", Email: "amcenp", Username: "ammce"})
 
 	sqlStatement := `SELECT id, username, email FROM users;`
 
