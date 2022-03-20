@@ -9,6 +9,7 @@ import (
 
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	"github.com/Ammce/hackernews/adapters/graph/models/inputs"
+	"github.com/Ammce/hackernews/domain/user"
 	mocked_data "github.com/Ammce/hackernews/mock"
 )
 
@@ -25,6 +26,9 @@ func (r *queryResolver) User(ctx context.Context) (*models.User, error) {
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
+
+	r.Domain.userService.CreateUser(user.User{ID: "123", Email: "amcenp", Username: "ammce"})
+
 	sqlStatement := `SELECT id, username, email FROM users;`
 
 	var users []*models.User

@@ -10,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/Ammce/hackernews/adapters/graph/generated"
 	graph "github.com/Ammce/hackernews/adapters/graph/resolvers"
+	"github.com/Ammce/hackernews/domain/user"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
@@ -20,7 +21,7 @@ const defaultPort = ":8080"
 func graphqlHandler(db *sql.DB) gin.HandlerFunc {
 	// NewExecutableSchema and Config are in the generated.go file
 	// Resolver is in the resolver.go file
-	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db}}))
+	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db, Domain: graph.DomainImplementation(user.UserServiceImpl{})}}))
 
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)
