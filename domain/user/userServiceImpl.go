@@ -5,6 +5,7 @@ type UserServiceImpl struct {
 }
 
 func (ur UserServiceImpl) CreateUser(user *User) (*User, error) {
+	user.HashPassword(user.Password)
 	savedUser, err := ur.UserRepo.SaveUser(user)
 	if err != nil {
 		return nil, err
