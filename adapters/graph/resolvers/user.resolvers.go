@@ -7,8 +7,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/Ammce/hackernews/graph/models"
-	"github.com/Ammce/hackernews/graph/models/inputs"
+	"github.com/Ammce/hackernews/adapters/graph/models"
+	"github.com/Ammce/hackernews/adapters/graph/models/inputs"
 	mocked_data "github.com/Ammce/hackernews/mock"
 )
 

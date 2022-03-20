@@ -6,8 +6,8 @@ package graph
 import (
 	"context"
 
-	"github.com/Ammce/hackernews/graph/generated"
-	"github.com/Ammce/hackernews/graph/models"
+	"github.com/Ammce/hackernews/adapters/graph/generated"
+	"github.com/Ammce/hackernews/adapters/graph/models"
 	mocked_data "github.com/Ammce/hackernews/mock"
 )
 

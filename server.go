@@ -8,8 +8,8 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/Ammce/hackernews/graph/generated"
-	graph "github.com/Ammce/hackernews/graph/resolvers"
+	"github.com/Ammce/hackernews/adapters/graph/generated"
+	graph "github.com/Ammce/hackernews/adapters/graph/resolvers"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )

@@ -1,10 +1,10 @@
 # Where are all the schema files located? globs are supported eg  src/**/*.graphqls
 schema:
-  - graph/**/*.graphqls
+  - adapters/graph/**/*.graphqls
 
 # Where should the generated server code go?
 exec:
-  filename: graph/generated/generated.go
+  filename: adapters/graph/generated/generated.go
   package: generated
 
 # Uncomment to enable federation
@@ -19,7 +19,7 @@ exec:
 # Where should the resolver implementations go?
 resolver:
   layout: follow-schema
-  dir: graph/resolvers
+  dir: adapters/graph/resolvers
   package: graph
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
@@ -58,13 +58,13 @@ models:
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
   User:
-    model: github.com/Ammce/hackernews/graph/models.User
+    model: github.com/Ammce/hackernews/adapters/graph/models.User
   UserInput:
-    model: github.com/Ammce/hackernews/graph/models/inputs.UserInput
+    model: github.com/Ammce/hackernews/adapters/graph/models/inputs.UserInput
   News:
-    model: github.com/Ammce/hackernews/graph/models.News
+    model: github.com/Ammce/hackernews/adapters/graph/models.News
   Comment:
-    model: github.com/Ammce/hackernews/graph/models.Comment
+    model: github.com/Ammce/hackernews/adapters/graph/models.Comment
     fields:
       ipAddress:
         resolver: true

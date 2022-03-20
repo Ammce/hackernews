@@ -6,7 +6,7 @@ package graph
 import (
 	"context"
 
-	"github.com/Ammce/hackernews/graph/generated"
+	"github.com/Ammce/hackernews/adapters/graph/generated"
 )
 
 func (r *mutationResolver) HealtcheckMutation(ctx context.Context, str string) (string, error) {

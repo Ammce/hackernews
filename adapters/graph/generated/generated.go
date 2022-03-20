@@ -12,8 +12,8 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/Ammce/hackernews/graph/models"
-	"github.com/Ammce/hackernews/graph/models/inputs"
+	"github.com/Ammce/hackernews/adapters/graph/models"
+	"github.com/Ammce/hackernews/adapters/graph/models/inputs"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -415,7 +415,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/graphql/comment.graphqls", Input: `type Comment {
+	{Name: "adapters/graph/graphql/comment.graphqls", Input: `type Comment {
   id: ID!
   text: String!
   createdById: ID!
@@ -431,7 +431,7 @@ extend type Query {
   comments: [Comment!]
 }
 `, BuiltIn: false},
-	{Name: "graph/graphql/graphql.graphqls", Input: `type Query {
+	{Name: "adapters/graph/graphql/graphql.graphqls", Input: `type Query {
   healthcheck: String!
 }
 
@@ -439,7 +439,7 @@ type Mutation {
   healtcheckMutation(str: String!): String!
 }
 `, BuiltIn: false},
-	{Name: "graph/graphql/news.graphqls", Input: `type News {
+	{Name: "adapters/graph/graphql/news.graphqls", Input: `type News {
   id: ID!
   title: String!
   text: String!
@@ -457,7 +457,7 @@ extend type Query {
   allNews: [News!]
 }
 `, BuiltIn: false},
-	{Name: "graph/graphql/user.graphqls", Input: `type User {
+	{Name: "adapters/graph/graphql/user.graphqls", Input: `type User {
   id: ID!
   username: String!
   email: String!
@@ -491,7 +491,7 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	var arg0 *inputs.UserInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOUserInput2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚋinputsᚐUserInput(ctx, tmp)
+		arg0, err = ec.unmarshalOUserInput2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -775,7 +775,7 @@ func (ec *executionContext) _Comment_createdBy(ctx context.Context, field graphq
 	}
 	res := resTmp.(*models.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Comment_news(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
@@ -810,7 +810,7 @@ func (ec *executionContext) _Comment_news(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*models.News)
 	fc.Result = res
-	return ec.marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐNews(ctx, field.Selections, res)
+	return ec.marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNews(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Comment_ipAddress(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
@@ -929,7 +929,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	}
 	res := resTmp.(*models.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _News_id(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
@@ -1209,7 +1209,7 @@ func (ec *executionContext) _News_createdBy(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*models.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _News_approvedBy(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
@@ -1244,7 +1244,7 @@ func (ec *executionContext) _News_approvedBy(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*models.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _News_comments(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
@@ -1276,7 +1276,7 @@ func (ec *executionContext) _News_comments(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.([]*models.Comment)
 	fc.Result = res
-	return ec.marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐCommentᚄ(ctx, field.Selections, res)
+	return ec.marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐCommentᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_healthcheck(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1346,7 +1346,7 @@ func (ec *executionContext) _Query_comment(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*models.Comment)
 	fc.Result = res
-	return ec.marshalNComment2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐComment(ctx, field.Selections, res)
+	return ec.marshalNComment2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐComment(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_comments(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1378,7 +1378,7 @@ func (ec *executionContext) _Query_comments(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*models.Comment)
 	fc.Result = res
-	return ec.marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐCommentᚄ(ctx, field.Selections, res)
+	return ec.marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐCommentᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_news(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1413,7 +1413,7 @@ func (ec *executionContext) _Query_news(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*models.News)
 	fc.Result = res
-	return ec.marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐNews(ctx, field.Selections, res)
+	return ec.marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNews(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_allNews(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1445,7 +1445,7 @@ func (ec *executionContext) _Query_allNews(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.([]*models.News)
 	fc.Result = res
-	return ec.marshalONews2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐNewsᚄ(ctx, field.Selections, res)
+	return ec.marshalONews2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNewsᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1480,7 +1480,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*models.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1512,7 +1512,7 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]*models.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3938,11 +3938,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNComment2githubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐComment(ctx context.Context, sel ast.SelectionSet, v models.Comment) graphql.Marshaler {
+func (ec *executionContext) marshalNComment2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐComment(ctx context.Context, sel ast.SelectionSet, v models.Comment) graphql.Marshaler {
 	return ec._Comment(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNComment2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐComment(ctx context.Context, sel ast.SelectionSet, v *models.Comment) graphql.Marshaler {
+func (ec *executionContext) marshalNComment2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐComment(ctx context.Context, sel ast.SelectionSet, v *models.Comment) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3967,11 +3967,11 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNNews2githubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐNews(ctx context.Context, sel ast.SelectionSet, v models.News) graphql.Marshaler {
+func (ec *executionContext) marshalNNews2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNews(ctx context.Context, sel ast.SelectionSet, v models.News) graphql.Marshaler {
 	return ec._News(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐNews(ctx context.Context, sel ast.SelectionSet, v *models.News) graphql.Marshaler {
+func (ec *executionContext) marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNews(ctx context.Context, sel ast.SelectionSet, v *models.News) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3996,11 +3996,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4289,7 +4289,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐCommentᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Comment) graphql.Marshaler {
+func (ec *executionContext) marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐCommentᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Comment) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4316,7 +4316,7 @@ func (ec *executionContext) marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackern
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNComment2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐComment(ctx, sel, v[i])
+			ret[i] = ec.marshalNComment2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐComment(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4336,7 +4336,7 @@ func (ec *executionContext) marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackern
 	return ret
 }
 
-func (ec *executionContext) marshalONews2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐNewsᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.News) graphql.Marshaler {
+func (ec *executionContext) marshalONews2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNewsᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.News) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4363,7 +4363,7 @@ func (ec *executionContext) marshalONews2ᚕᚖgithubᚗcomᚋAmmceᚋhackernews
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐNews(ctx, sel, v[i])
+			ret[i] = ec.marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNews(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4399,7 +4399,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4426,7 +4426,7 @@ func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋAmmceᚋhackernews
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4446,7 +4446,7 @@ func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋAmmceᚋhackernews
 	return ret
 }
 
-func (ec *executionContext) unmarshalOUserInput2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋgraphᚋmodelsᚋinputsᚐUserInput(ctx context.Context, v interface{}) (*inputs.UserInput, error) {
+func (ec *executionContext) unmarshalOUserInput2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐUserInput(ctx context.Context, v interface{}) (*inputs.UserInput, error) {
 	if v == nil {
 		return nil, nil
 	}
