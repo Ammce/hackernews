@@ -7,6 +7,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/Ammce/hackernews/adapters/graph/mappers"
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	"github.com/Ammce/hackernews/adapters/graph/models/inputs"
 	"github.com/Ammce/hackernews/domain/user"
@@ -14,11 +15,9 @@ import (
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *inputs.UserInput) (*models.User, error) {
-	return &models.User{
-		Username: input.Username,
-		Email:    input.Email,
-		Password: input.Password,
-	}, nil
+	mappedUserInput := mappers.UserInputToUserDomain(input)
+	domainUser, _ := r.Domain.userService.CreateUser(mappedUserInput)
+	return mappers.UserDomainToUserGraphQL(domainUser), nil
 }
 
 func (r *queryResolver) User(ctx context.Context) (*models.User, error) {

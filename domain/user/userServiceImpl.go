@@ -8,5 +8,9 @@ type UserServiceImpl struct {
 
 func (ur UserServiceImpl) CreateUser(user User) (*User, error) {
 	fmt.Println("User je", user)
-	return nil, nil
+	return &User{
+		Username: "Ammce",
+		Email:    "amcenp@gmail.com",
+		ID:       "001",
+	}, nil
 }
