@@ -20,5 +20,8 @@ input NewsInput {
 extend type Query {
   news: News!
   allNews: [News!]
+}
+
+extend type Mutation {
   createNews(input: NewsInput!): News!
 }

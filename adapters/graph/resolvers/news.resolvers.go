@@ -5,7 +5,7 @@ package graph
 
 import (
 	"context"
-	"fmt"
+	"strconv"
 
 	"github.com/Ammce/hackernews/adapters/graph/generated"
 	"github.com/Ammce/hackernews/adapters/graph/models"
@@ -13,8 +13,42 @@ import (
 	mocked_data "github.com/Ammce/hackernews/mock"
 )
 
+func (r *mutationResolver) CreateNews(ctx context.Context, input inputs.NewsInput) (*models.News, error) {
+	sqlStatement := `INSERT INTO news (title, text, created_by_id) VALUES ($1, $2, $3) returning id`
+
+	var id int64
+
+	if err := r.DB.QueryRow(sqlStatement, input.Title, input.Text, input.CreatedById).Scan(&id); err != nil {
+		return nil, err
+	}
+	return &models.News{
+		ID:          strconv.FormatInt(id, 10),
+		Text:        input.Text,
+		Title:       input.Title,
+		CreatedById: input.CreatedById,
+	}, nil
+}
+
 func (r *newsResolver) CreatedBy(ctx context.Context, obj *models.News) (*models.User, error) {
-	return &mocked_data.MockUser, nil
+	sqlStatement := `SELECT id, username, email FROM users WHERE id=$1`
+	var user models.User
+
+	row, err := r.DB.Query(sqlStatement, obj.CreatedById)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for row.Next() {
+		err := row.Scan(&user.ID, &user.Username, &user.Email)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	defer row.Close()
+
+	return &user, nil
 }
 
 func (r *newsResolver) ApprovedBy(ctx context.Context, obj *models.News) (*models.User, error) {
@@ -36,11 +70,28 @@ func (r *queryResolver) News(ctx context.Context) (*models.News, error) {
 }
 
 func (r *queryResolver) AllNews(ctx context.Context) ([]*models.News, error) {
-	return mocked_data.News, nil
-}
+	sqlStatement := `SELECT id, text, title, created_by_id FROM news`
 
-func (r *queryResolver) CreateNews(ctx context.Context, input inputs.NewsInput) (*models.News, error) {
-	panic(fmt.Errorf("not implemented"))
+	rows, err := r.DB.Query(sqlStatement)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var allNews []*models.News
+
+	for rows.Next() {
+		var news models.News
+		err := rows.Scan(&news.ID, &news.Text, &news.Title, &news.CreatedById)
+		if err != nil {
+			return nil, err
+		}
+		allNews = append(allNews, &news)
+	}
+
+	defer rows.Close()
+
+	return allNews, nil
 }
 
 // News returns generated.NewsResolver implementation.
