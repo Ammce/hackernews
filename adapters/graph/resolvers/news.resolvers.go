@@ -5,12 +5,14 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/Ammce/hackernews/adapters/graph/generated"
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	"github.com/Ammce/hackernews/adapters/graph/models/inputs"
 	mocked_data "github.com/Ammce/hackernews/mock"
+	"github.com/graph-gophers/dataloader"
 )
 
 func (r *mutationResolver) CreateNews(ctx context.Context, input inputs.NewsInput) (*models.News, error) {
@@ -30,25 +32,34 @@ func (r *mutationResolver) CreateNews(ctx context.Context, input inputs.NewsInpu
 }
 
 func (r *newsResolver) CreatedBy(ctx context.Context, obj *models.News) (*models.User, error) {
-	sqlStatement := `SELECT id, username, email FROM users WHERE id=$1`
-	var user models.User
-
-	row, err := r.DB.Query(sqlStatement, obj.CreatedById)
-
+	thunk := r.UserDataLoader.Load(context.TODO(), dataloader.StringKey(obj.CreatedById)) // StringKey is a convenience method that make wraps string to implement `Key` interface
+	result, err := thunk()
 	if err != nil {
-		return nil, err
+		fmt.Println("Erro se desio", err)
+		// handle data error
 	}
 
-	for row.Next() {
-		err := row.Scan(&user.ID, &user.Username, &user.Email)
-		if err != nil {
-			return nil, err
-		}
-	}
+	fmt.Println(result)
+	return result.(*models.User), nil
 
-	defer row.Close()
+	// fmt.Println(us)
 
-	return &user, nil
+	// row, err := r.DB.Query(sqlStatement, obj.CreatedById)
+
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// for row.Next() {
+	// 	err := row.Scan(&user.ID, &user.Username, &user.Email)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
+
+	// defer row.Close()
+
+	// return &user, nil
 }
 
 func (r *newsResolver) ApprovedBy(ctx context.Context, obj *models.News) (*models.User, error) {
