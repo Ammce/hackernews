@@ -4,8 +4,18 @@ type User {
   email: String!
 }
 
+type UserWithToken {
+  user: User!
+  token: String!
+}
+
 input UserInput {
   username: String!
+  email: String!
+  password: String!
+}
+
+input LoginInput {
   email: String!
   password: String!
 }
@@ -13,6 +23,7 @@ input UserInput {
 extend type Query {
   user: User!
   users: [User!]
+  login(input: LoginInput!): UserWithToken
 }
 
 extend type Mutation {

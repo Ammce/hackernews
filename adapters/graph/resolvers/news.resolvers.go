@@ -32,7 +32,6 @@ func (r *mutationResolver) CreateNews(ctx context.Context, input inputs.NewsInpu
 }
 
 func (r *newsResolver) CreatedBy(ctx context.Context, obj *models.News) (*models.User, error) {
-
 	thunk := r.UserDataLoader.Load(context.TODO(), dataloader.StringKey(obj.CreatedById)) // StringKey is a convenience method that make wraps string to implement `Key` interface
 	result, err := thunk()
 	if err != nil {

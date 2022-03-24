@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/Ammce/hackernews/adapters/graph/mappers"
@@ -52,4 +53,8 @@ func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
 	defer rows.Close()
 
 	return users, nil
+}
+
+func (r *queryResolver) Login(ctx context.Context, input inputs.LoginInput) (*models.UserWithToken, error) {
+	panic(fmt.Errorf("not implemented"))
 }

@@ -6,3 +6,8 @@ type User struct {
 	Email    string `json:"naemailme"`
 	Password string `json:"password"`
 }
+
+type UserWithToken struct {
+	User  *User
+	Token string
+}
