@@ -32,34 +32,13 @@ func (r *mutationResolver) CreateNews(ctx context.Context, input inputs.NewsInpu
 }
 
 func (r *newsResolver) CreatedBy(ctx context.Context, obj *models.News) (*models.User, error) {
+
 	thunk := r.UserDataLoader.Load(context.TODO(), dataloader.StringKey(obj.CreatedById)) // StringKey is a convenience method that make wraps string to implement `Key` interface
 	result, err := thunk()
 	if err != nil {
 		fmt.Println("Erro se desio", err)
-		// handle data error
 	}
-
-	fmt.Println(result)
 	return result.(*models.User), nil
-
-	// fmt.Println(us)
-
-	// row, err := r.DB.Query(sqlStatement, obj.CreatedById)
-
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// for row.Next() {
-	// 	err := row.Scan(&user.ID, &user.Username, &user.Email)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// }
-
-	// defer row.Close()
-
-	// return &user, nil
 }
 
 func (r *newsResolver) ApprovedBy(ctx context.Context, obj *models.News) (*models.User, error) {

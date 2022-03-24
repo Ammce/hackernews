@@ -3,6 +3,8 @@ package graph
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	"github.com/graph-gophers/dataloader"
@@ -11,7 +13,10 @@ import (
 func UserDataLoader(db *sql.DB) *dataloader.Loader {
 
 	batchFn := func(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
-		sqlStatement := "SELECT id, username, email FROM users WHERE id IN (3, 1, 2)"
+		str := strings.Join(keys.Keys(), ", ")
+
+		fmt.Println(str)
+		sqlStatement := fmt.Sprintf("SELECT id, username, email FROM users WHERE id IN (%s)", str)
 		row, err := db.Query(sqlStatement)
 		if err != nil {
 			return nil
