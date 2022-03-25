@@ -1,14 +1,19 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/Ammce/hackernews/adapters/graph/generated"
+	"github.com/Ammce/hackernews/adapters/graph/middleware"
+	"github.com/Ammce/hackernews/adapters/graph/models"
 	graph "github.com/Ammce/hackernews/adapters/graph/resolvers"
 	repositories "github.com/Ammce/hackernews/adapters/postgres/repository"
 	"github.com/Ammce/hackernews/domain/user"
@@ -29,7 +34,14 @@ func graphqlHandler(db *sql.DB) gin.HandlerFunc {
 		UserService: userService,
 	}
 
-	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db, Domain: domain, UserDataLoader: graph.UserDataLoader(db)}}))
+	c := generated.Config{Resolvers: &graph.Resolver{DB: db, Domain: domain, UserDataLoader: graph.UserDataLoader(db)}}
+	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role models.Role) (interface{}, error) {
+		fmt.Println(ctx.Value("userIds"))
+		// or let it pass through
+		return next(ctx)
+	}
+
+	h := handler.NewDefaultServer(generated.NewExecutableSchema(c))
 
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)
@@ -60,6 +72,7 @@ func main() {
 	defer db.Close()
 
 	r := gin.Default()
+	r.Use(middleware.Auth())
 	r.POST("/query", graphqlHandler(db))
 	r.GET("/", playgroundHandler())
 	r.Run(defaultPort)
