@@ -61,6 +61,7 @@ type ComplexityRoot struct {
 		CreateNews         func(childComplexity int, input inputs.NewsInput) int
 		CreateUser         func(childComplexity int, input *inputs.UserInput) int
 		HealtcheckMutation func(childComplexity int, str string) int
+		Login              func(childComplexity int, input inputs.LoginInput) int
 	}
 
 	News struct {
@@ -81,7 +82,6 @@ type ComplexityRoot struct {
 		Comment     func(childComplexity int) int
 		Comments    func(childComplexity int) int
 		Healthcheck func(childComplexity int) int
-		Login       func(childComplexity int, input inputs.LoginInput) int
 		News        func(childComplexity int) int
 		User        func(childComplexity int) int
 		Users       func(childComplexity int) int
@@ -108,6 +108,7 @@ type MutationResolver interface {
 	HealtcheckMutation(ctx context.Context, str string) (string, error)
 	CreateNews(ctx context.Context, input inputs.NewsInput) (*models.News, error)
 	CreateUser(ctx context.Context, input *inputs.UserInput) (*models.User, error)
+	Login(ctx context.Context, input inputs.LoginInput) (*models.UserWithToken, error)
 }
 type NewsResolver interface {
 	CreatedBy(ctx context.Context, obj *models.News) (*models.User, error)
@@ -122,7 +123,6 @@ type QueryResolver interface {
 	AllNews(ctx context.Context) ([]*models.News, error)
 	User(ctx context.Context) (*models.User, error)
 	Users(ctx context.Context) ([]*models.User, error)
-	Login(ctx context.Context, input inputs.LoginInput) (*models.UserWithToken, error)
 }
 
 type executableSchema struct {
@@ -232,6 +232,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.HealtcheckMutation(childComplexity, args["str"].(string)), true
 
+	case "Mutation.login":
+		if e.complexity.Mutation.Login == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_login_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Login(childComplexity, args["input"].(inputs.LoginInput)), true
+
 	case "News.approvedBy":
 		if e.complexity.News.ApprovedBy == nil {
 			break
@@ -329,18 +341,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Healthcheck(childComplexity), true
-
-	case "Query.login":
-		if e.complexity.Query.Login == nil {
-			break
-		}
-
-		args, err := ec.field_Query_login_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Login(childComplexity, args["input"].(inputs.LoginInput)), true
 
 	case "Query.news":
 		if e.complexity.Query.News == nil {
@@ -539,11 +539,11 @@ input LoginInput {
 extend type Query {
   user: User!
   users: [User!]
-  login(input: LoginInput!): UserWithToken
 }
 
 extend type Mutation {
   createUser(input: UserInput): User!
+  login(input: LoginInput!): UserWithToken
 }
 `, BuiltIn: false},
 }
@@ -598,6 +598,21 @@ func (ec *executionContext) field_Mutation_healtcheckMutation_args(ctx context.C
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 inputs.LoginInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNLoginInput2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐLoginInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -610,21 +625,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_login_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 inputs.LoginInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNLoginInput2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐLoginInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
 	return args, nil
 }
 
@@ -1070,6 +1070,45 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	res := resTmp.(*models.User)
 	fc.Result = res
 	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_login_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Login(rctx, args["input"].(inputs.LoginInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*models.UserWithToken)
+	fc.Result = res
+	return ec.marshalOUserWithToken2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUserWithToken(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _News_id(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
@@ -1653,45 +1692,6 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	res := resTmp.([]*models.User)
 	fc.Result = res
 	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUserᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_login(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_login_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Login(rctx, args["input"].(inputs.LoginInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*models.UserWithToken)
-	fc.Result = res
-	return ec.marshalOUserWithToken2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUserWithToken(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3423,6 +3423,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "login":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_login(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3743,26 +3750,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_users(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "login":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_login(ctx, field)
 				return res
 			}
 

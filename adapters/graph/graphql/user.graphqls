@@ -23,9 +23,9 @@ input LoginInput {
 extend type Query {
   user: User!
   users: [User!]
-  login(input: LoginInput!): UserWithToken
 }
 
 extend type Mutation {
   createUser(input: UserInput): User!
+  login(input: LoginInput!): UserWithToken
 }
