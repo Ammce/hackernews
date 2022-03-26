@@ -36,7 +36,9 @@ func graphqlHandler(db *sql.DB) gin.HandlerFunc {
 
 	c := generated.Config{Resolvers: &graph.Resolver{DB: db, Domain: domain, UserDataLoader: graph.UserDataLoader(db)}}
 	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role models.Role) (interface{}, error) {
-		fmt.Println(ctx.Value("userIds"))
+		userData := ctx.Value(middleware.UserDataKey).(*middleware.UserIDAndRoles)
+		fmt.Println(userData.UserId)
+		fmt.Println(userData.Roles)
 		// or let it pass through
 		return next(ctx)
 	}

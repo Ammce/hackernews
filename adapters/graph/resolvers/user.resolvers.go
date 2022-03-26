@@ -8,9 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/Ammce/hackernews/adapters/graph/mappers"
+	"github.com/Ammce/hackernews/adapters/graph/middleware"
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	"github.com/Ammce/hackernews/adapters/graph/models/inputs"
 	mocked_data "github.com/Ammce/hackernews/mock"
@@ -19,7 +19,8 @@ import (
 )
 
 type MyCustomClaims struct {
-	UserId string `json:"userId"`
+	UserId string   `json:"userId"`
+	Roles  []string `json:"roles"`
 	jwt.StandardClaims
 }
 
@@ -31,7 +32,6 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input *inputs.UserInp
 
 func (r *mutationResolver) Login(ctx context.Context, input inputs.LoginInput) (*models.UserWithToken, error) {
 	var user models.User
-	mySigningKey := []byte("AllYourBase")
 	sqlQuery := `SELECT id, email, password, username FROM users WHERE email=$1`
 
 	row := r.DB.QueryRow(sqlQuery, input.Email)
@@ -44,21 +44,9 @@ func (r *mutationResolver) Login(ctx context.Context, input inputs.LoginInput) (
 		fmt.Println(hashErr)
 		return nil, errors.New("invalid data pass")
 	}
-	claims := MyCustomClaims{
-		"bar",
-		jwt.StandardClaims{
-			ExpiresAt: int64(time.Hour) * 3000,
-			Issuer:    "test",
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, tokenErr := token.SignedString(mySigningKey)
-	if tokenErr != nil {
-		fmt.Println(tokenErr)
-		return nil, tokenErr
-	}
+	signedToken := middleware.SignToken(user.ID)
 	return &models.UserWithToken{
-		Token: ss,
+		Token: *signedToken,
 		User:  &user,
 	}, nil
 }
