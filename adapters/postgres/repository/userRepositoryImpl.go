@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"database/sql"
-	"log"
+	"fmt"
 	"strconv"
 
 	"github.com/Ammce/hackernews/domain/user"
@@ -18,7 +18,8 @@ func (ur UserRepositoryImpl) SaveUser(u *user.User) (*user.User, error) {
 	var id int64
 
 	if err := ur.DB.QueryRow(sqlStatement, u.Email, u.Username, u.Password).Scan(&id); err != nil {
-		log.Fatalf("Unable to execute the query. %v", err)
+		fmt.Println("Unable to execute the query.", err)
+		return nil, err
 	}
 
 	return &user.User{

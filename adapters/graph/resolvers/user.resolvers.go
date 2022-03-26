@@ -19,7 +19,10 @@ import (
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *inputs.UserInput) (*models.User, error) {
 	mappedUserInput := mappers.UserInputToUserDomain(input)
-	domainUser, _ := r.Domain.UserService.CreateUser(mappedUserInput)
+	domainUser, err := r.Domain.UserService.CreateUser(mappedUserInput)
+	if err != nil {
+		return nil, err
+	}
 	return mappers.UserDomainToUserGraphQL(domainUser), nil
 }
 

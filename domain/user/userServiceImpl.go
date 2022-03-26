@@ -1,5 +1,7 @@
 package user
 
+import "errors"
+
 type UserServiceImpl struct {
 	UserRepo UserRepository
 }
@@ -8,7 +10,7 @@ func (ur UserServiceImpl) CreateUser(user *User) (*User, error) {
 	user.HashPassword(user.Password)
 	savedUser, err := ur.UserRepo.SaveUser(user)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("invalid query execution")
 	}
 	return savedUser, nil
 }
