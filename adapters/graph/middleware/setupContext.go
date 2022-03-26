@@ -20,16 +20,16 @@ type MyCustomClaims struct {
 
 type UserDataString string
 
-var UserDataKey UserDataString = "userData"
+type AuthorizationString string
 
-func Auth() gin.HandlerFunc {
+var UserDataKey UserDataString = "userData"
+var AuthorizationHeader AuthorizationString = "Authorization"
+
+func SetupContext() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx context.Context
-		fmt.Println("Logging the request", time.Now())
 		token := c.Request.Header.Get("Authorization")
-		userIdAndRoles := VerifyToken(token)
-
-		ctx = context.WithValue(c.Request.Context(), UserDataKey, userIdAndRoles)
+		ctx = context.WithValue(c.Request.Context(), AuthorizationHeader, token)
 		c.Request = c.Request.WithContext(ctx)
 		c.Next()
 	}
@@ -56,7 +56,10 @@ func SignToken(userId string) *string {
 }
 
 func VerifyToken(tokenString string) *UserIDAndRoles {
-	token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+	if tokenString == "" {
+		return nil
+	}
+	token, _ := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return mySigningKey, nil
 	})
 
@@ -67,7 +70,7 @@ func VerifyToken(tokenString string) *UserIDAndRoles {
 		}
 
 	} else {
-		fmt.Println(err)
+		fmt.Println("Unable to verify token")
 		return nil
 	}
 }

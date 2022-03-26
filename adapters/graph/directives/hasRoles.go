@@ -12,9 +12,13 @@ import (
 
 func SetupHasRolesDirective(c *generated.Config) {
 	c.Directives.HasRoles = func(ctx context.Context, obj interface{}, next graphql.Resolver, roles []models.Role) (interface{}, error) {
-		userData := ctx.Value(middleware.UserDataKey).(*middleware.UserIDAndRoles)
+		userData := ctx.Value(middleware.UserDataKey)
+		if userData == nil {
+			return nil, errors.New("calling @hasRoles directive before or without @isAuth directive")
+		}
+		castedUserData := userData.(*middleware.UserIDAndRoles)
 		userRolesMap := map[string]bool{}
-		for _, userRole := range userData.Roles {
+		for _, userRole := range castedUserData.Roles {
 			userRolesMap[string(userRole)] = true
 		}
 

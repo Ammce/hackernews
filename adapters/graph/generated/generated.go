@@ -45,6 +45,7 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 	HasRoles func(ctx context.Context, obj interface{}, next graphql.Resolver, roles []models.Role) (res interface{}, err error)
+	IsAuth   func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -480,7 +481,9 @@ extend type Query {
   comments: [Comment!]
 }
 `, BuiltIn: false},
-	{Name: "adapters/graph/graphql/graphql.graphqls", Input: `type Query {
+	{Name: "adapters/graph/graphql/graphql.graphqls", Input: `directive @hasRoles(roles: [Role!]) on FIELD_DEFINITION
+directive @isAuth on FIELD_DEFINITION
+type Query {
   healthcheck: String!
 }
 
@@ -516,9 +519,7 @@ extend type Mutation {
   createNews(input: NewsInput!): News!
 }
 `, BuiltIn: false},
-	{Name: "adapters/graph/graphql/user.graphqls", Input: `directive @hasRoles(roles: [Role!]) on FIELD_DEFINITION
-
-enum Role {
+	{Name: "adapters/graph/graphql/user.graphqls", Input: `enum Role {
   ADMIN
   USER
 }
@@ -547,7 +548,7 @@ input LoginInput {
 
 extend type Query {
   user: User! @hasRoles(roles: [ADMIN, USER])
-  users: [User!]
+  users: [User!] @hasRoles(roles: [ADMIN]) @isAuth
 }
 
 extend type Mutation {
@@ -1751,8 +1752,38 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Users(rctx)
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().Users(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			roles, err := ec.unmarshalORole2ᚕgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐRoleᚄ(ctx, []interface{}{"ADMIN"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasRoles == nil {
+				return nil, errors.New("directive hasRoles is not implemented")
+			}
+			return ec.directives.HasRoles(ctx, nil, directive0, roles)
+		}
+		directive2 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.IsAuth == nil {
+				return nil, errors.New("directive isAuth is not implemented")
+			}
+			return ec.directives.IsAuth(ctx, nil, directive1)
+		}
+
+		tmp, err := directive2(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*models.User); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/Ammce/hackernews/adapters/graph/models.User`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)

@@ -65,7 +65,10 @@ func main() {
 	defer db.Close()
 
 	r := gin.Default()
-	r.Use(middleware.Auth())
+	r.Use(middleware.SetupContext())
+	r.GET("/health", func(ctx *gin.Context) {
+		ctx.Status(200)
+	})
 	r.POST("/query", graphqlHandler(db))
 	r.GET("/", playgroundHandler())
 	r.Run(defaultPort)
