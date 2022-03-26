@@ -45,13 +45,11 @@ func (ur UserRepositoryImpl) GetUserById(userId string) (*user.User, error) {
 }
 
 func (ur UserRepositoryImpl) GetUserByField(field string, fieldValue string) (*user.User, error) {
-	sqlStatement := fmt.Sprintf(`SELECT id, email, username FROM users WHERE %s = %v`, field, fieldValue)
-	fmt.Println("DELET THIS QUERY AFTER - ", sqlStatement)
-
+	sqlStatement := fmt.Sprintf(`SELECT id, email, username, password FROM users WHERE %v = '%v'`, field, fieldValue)
 	var user user.User
 
-	if err := ur.DB.QueryRow(sqlStatement).Scan(&user.ID, &user.Email, &user.Username); err != nil {
-		fmt.Println("Unable to execute the query GetUserById.", err)
+	if err := ur.DB.QueryRow(sqlStatement).Scan(&user.ID, &user.Email, &user.Username, &user.Password); err != nil {
+		fmt.Println("Unable to execute the query GetUserByField.", err)
 		return nil, err
 	}
 
