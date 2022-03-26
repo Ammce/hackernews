@@ -44,7 +44,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	HasRoles func(ctx context.Context, obj interface{}, next graphql.Resolver, role []models.Role) (res interface{}, err error)
+	HasRoles func(ctx context.Context, obj interface{}, next graphql.Resolver, roles []models.Role) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -516,7 +516,7 @@ extend type Mutation {
   createNews(input: NewsInput!): News!
 }
 `, BuiltIn: false},
-	{Name: "adapters/graph/graphql/user.graphqls", Input: `directive @hasRoles(role: [Role!]) on FIELD_DEFINITION
+	{Name: "adapters/graph/graphql/user.graphqls", Input: `directive @hasRoles(roles: [Role!]) on FIELD_DEFINITION
 
 enum Role {
   ADMIN
@@ -546,7 +546,7 @@ input LoginInput {
 }
 
 extend type Query {
-  user: User! @hasRoles(roles: [ADMIN])
+  user: User! @hasRoles(roles: [ADMIN, USER])
   users: [User!]
 }
 
@@ -566,14 +566,14 @@ func (ec *executionContext) dir_hasRoles_args(ctx context.Context, rawArgs map[s
 	var err error
 	args := map[string]interface{}{}
 	var arg0 []models.Role
-	if tmp, ok := rawArgs["role"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
+	if tmp, ok := rawArgs["roles"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("roles"))
 		arg0, err = ec.unmarshalORole2ᚕgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐRoleᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["role"] = arg0
+	args["roles"] = arg0
 	return args, nil
 }
 
@@ -1083,10 +1083,14 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 			return ec.resolvers.Mutation().CreateUser(rctx, args["input"].(*inputs.UserInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
+			roles, err := ec.unmarshalORole2ᚕgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐRoleᚄ(ctx, []interface{}{"ADMIN"})
+			if err != nil {
+				return nil, err
+			}
 			if ec.directives.HasRoles == nil {
 				return nil, errors.New("directive hasRoles is not implemented")
 			}
-			return ec.directives.HasRoles(ctx, nil, directive0, nil)
+			return ec.directives.HasRoles(ctx, nil, directive0, roles)
 		}
 
 		tmp, err := directive1(rctx)
@@ -1693,10 +1697,14 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 			return ec.resolvers.Query().User(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
+			roles, err := ec.unmarshalORole2ᚕgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐRoleᚄ(ctx, []interface{}{"ADMIN", "USER"})
+			if err != nil {
+				return nil, err
+			}
 			if ec.directives.HasRoles == nil {
 				return nil, errors.New("directive hasRoles is not implemented")
 			}
-			return ec.directives.HasRoles(ctx, nil, directive0, nil)
+			return ec.directives.HasRoles(ctx, nil, directive0, roles)
 		}
 
 		tmp, err := directive1(rctx)

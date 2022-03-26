@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -37,9 +37,18 @@ func graphqlHandler(db *sql.DB) gin.HandlerFunc {
 	c := generated.Config{Resolvers: &graph.Resolver{DB: db, Domain: domain, UserDataLoader: graph.UserDataLoader(db)}}
 	c.Directives.HasRoles = func(ctx context.Context, obj interface{}, next graphql.Resolver, roles []models.Role) (interface{}, error) {
 		userData := ctx.Value(middleware.UserDataKey).(*middleware.UserIDAndRoles)
-		fmt.Println(roles)
-		fmt.Println(userData.UserId)
-		fmt.Println(userData.Roles)
+		userRolesMap := map[string]bool{}
+		for _, userRole := range userData.Roles {
+			userRolesMap[string(userRole)] = true
+		}
+
+		for _, requiredRole := range roles {
+			if !userRolesMap[string(requiredRole)] {
+				return nil, errors.New("no permissiosn for this")
+			}
+		}
+		// fmt.Println(userData.UserId)
+		// fmt.Println(userData.Roles)
 		// or let it pass through
 		return next(ctx)
 	}

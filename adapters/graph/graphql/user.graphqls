@@ -1,4 +1,4 @@
-directive @hasRoles(role: [Role!]) on FIELD_DEFINITION
+directive @hasRoles(roles: [Role!]) on FIELD_DEFINITION
 
 enum Role {
   ADMIN
@@ -28,7 +28,7 @@ input LoginInput {
 }
 
 extend type Query {
-  user: User! @hasRoles(roles: [ADMIN])
+  user: User! @hasRoles(roles: [ADMIN, USER])
   users: [User!]
 }
 
