@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -14,14 +15,25 @@ type UserRepositoryImpl struct {
 }
 
 func (ur UserRepositoryImpl) SaveUser(u *user.User) (*user.User, error) {
-	sqlStatement := `INSERT INTO users (email, username, password) VALUES ($1, $2, $3) RETURNING id`
 
+	sqlStatement := `INSERT INTO users (email, username, password) VALUES ($1, $2, $3) RETURNING id`
+	ctx := context.Background()
 	var id int64
 
-	if err := ur.DB.QueryRow(sqlStatement, u.Email, u.Username, u.Password).Scan(&id); err != nil {
-		fmt.Println("Unable to execute the query.", err)
-		return nil, err
+	tx, txErr := ur.DB.BeginTx(ctx, nil)
+
+	if txErr != nil {
+		return nil, nil
 	}
+
+	defer tx.Rollback()
+
+	if err := tx.QueryRowContext(ctx, sqlStatement, u.Email, u.Username, u.Password).Scan(&id); err != nil {
+		fmt.Println("Unable to execute the query.", err)
+		return nil, fmt.Errorf("CreateOrder: %v", err)
+	}
+
+	tx.Commit()
 
 	return &user.User{
 		Username: u.Username,
