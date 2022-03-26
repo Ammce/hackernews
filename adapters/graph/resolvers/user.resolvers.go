@@ -14,15 +14,8 @@ import (
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	"github.com/Ammce/hackernews/adapters/graph/models/inputs"
 	mocked_data "github.com/Ammce/hackernews/mock"
-	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
-
-type MyCustomClaims struct {
-	UserId string   `json:"userId"`
-	Roles  []string `json:"roles"`
-	jwt.StandardClaims
-}
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *inputs.UserInput) (*models.User, error) {
 	mappedUserInput := mappers.UserInputToUserDomain(input)

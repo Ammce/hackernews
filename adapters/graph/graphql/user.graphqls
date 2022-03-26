@@ -1,4 +1,4 @@
-directive @hasRole(role: Role!) on FIELD_DEFINITION
+directive @hasRoles(role: [Role!]) on FIELD_DEFINITION
 
 enum Role {
   ADMIN
@@ -28,11 +28,11 @@ input LoginInput {
 }
 
 extend type Query {
-  user: User! @hasRole(role: ADMIN)
+  user: User! @hasRoles(roles: [ADMIN])
   users: [User!]
 }
 
 extend type Mutation {
-  createUser(input: UserInput): User! @hasRole(role: ADMIN)
+  createUser(input: UserInput): User! @hasRoles(roles: [ADMIN])
   login(input: LoginInput!): UserWithToken
 }
