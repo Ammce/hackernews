@@ -7,13 +7,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
+	"github.com/Ammce/hackernews/adapters/graph/helpers"
 	"github.com/Ammce/hackernews/adapters/graph/mappers"
 	"github.com/Ammce/hackernews/adapters/graph/middleware"
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	"github.com/Ammce/hackernews/adapters/graph/models/inputs"
-	mocked_data "github.com/Ammce/hackernews/mock"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -47,37 +46,41 @@ func (r *mutationResolver) Login(ctx context.Context, input inputs.LoginInput) (
 	}, nil
 }
 
-func (r *queryResolver) User(ctx context.Context) (*models.User, error) {
-	return &mocked_data.MockUser, nil
+func (r *queryResolver) User(ctx context.Context, userID string) (*models.User, error) {
+	user, err := r.Domain.UserService.GetUser(userID)
+	if err != nil {
+		return nil, err
+	}
+	return mappers.UserDomainToUserGraphQL(user), nil
+}
+
+func (r *queryResolver) Self(ctx context.Context) (*models.User, error) {
+	userData := helpers.GetUsersDataFromContext(ctx)
+	if userData == nil {
+		return nil, errors.New("fIND ME -> No User data found")
+	}
+
+	user, err := r.Domain.UserService.GetUser(userData.UserId)
+	if err != nil {
+		return nil, err
+	}
+	return mappers.UserDomainToUserGraphQL(user), nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
-	sqlStatement := `SELECT id, username, email FROM users;`
-
-	var users []*models.User
-
-	rows, err := r.DB.Query(sqlStatement)
-
+	usersDomain, err := r.Domain.UserService.GetUsers()
 	if err != nil {
-		log.Fatalf("Unable to execute the query. %v", err)
+		return nil, errors.New("fIND ME -> Users , not found")
 	}
 
-	for rows.Next() {
-		var user models.User
+	var usersGraphQL []*models.User
 
-		// unmarshal the row object to user
-		err = rows.Scan(&user.ID, &user.Username, &user.Email)
-
-		if err != nil {
-			log.Fatalf("Unable to scan the row. %v", err)
-		}
-
-		// append the user in the users slice
-		users = append(users, &user)
+	for _, userDomain := range usersDomain {
+		userGraphQL := mappers.UserDomainToUserGraphQL(userDomain)
+		usersGraphQL = append(usersGraphQL, userGraphQL)
 
 	}
 
-	defer rows.Close()
+	return usersGraphQL, nil
 
-	return users, nil
 }
