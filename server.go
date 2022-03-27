@@ -13,6 +13,7 @@ import (
 	"github.com/Ammce/hackernews/adapters/graph/middleware"
 	graph "github.com/Ammce/hackernews/adapters/graph/resolvers"
 	repositories "github.com/Ammce/hackernews/adapters/postgres/repository"
+	"github.com/Ammce/hackernews/dataloaders"
 	"github.com/Ammce/hackernews/domain/auth"
 	"github.com/Ammce/hackernews/domain/news"
 	"github.com/Ammce/hackernews/domain/user"
@@ -39,7 +40,7 @@ func graphqlHandler(db *sql.DB) gin.HandlerFunc {
 		NewsService: newsService,
 	}
 
-	c := generated.Config{Resolvers: &graph.Resolver{DB: db, Domain: domain, UserDataLoader: graph.UserDataLoader(db)}}
+	c := generated.Config{Resolvers: &graph.Resolver{DB: db, Domain: domain, UserDataLoader: dataloaders.UserDataLoader(db)}}
 	directives.SetupDirectives(&c)
 
 	h := handler.NewDefaultServer(generated.NewExecutableSchema(c))

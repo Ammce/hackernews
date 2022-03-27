@@ -18,7 +18,7 @@ input NewsInput {
 }
 
 extend type Query {
-  news: News!
+  news(newsId: String!): News!
   allNews: [News!]
 }
 

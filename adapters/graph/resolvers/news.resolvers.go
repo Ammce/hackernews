@@ -33,10 +33,16 @@ func (r *newsResolver) CreatedBy(ctx context.Context, obj *models.News) (*models
 }
 
 func (r *newsResolver) ApprovedBy(ctx context.Context, obj *models.News) (*models.User, error) {
-	return &mocked_data.MockUser, nil
+	thunk := r.UserDataLoader.Load(context.TODO(), dataloader.StringKey(obj.CreatedById)) // StringKey is a convenience method that make wraps string to implement `Key` interface
+	result, err := thunk()
+	if err != nil {
+		fmt.Println("Erro se desio", err)
+	}
+	return result.(*models.User), nil
 }
 
 func (r *newsResolver) Comments(ctx context.Context, obj *models.News) ([]*models.Comment, error) {
+	// TODO - Handle comments here. Probably Data loader for comments
 	var currentModels []*models.Comment
 	for _, d := range mocked_data.AllComments {
 		if d.NewsId == obj.ID {
@@ -46,7 +52,7 @@ func (r *newsResolver) Comments(ctx context.Context, obj *models.News) ([]*model
 	return currentModels, nil
 }
 
-func (r *queryResolver) News(ctx context.Context) (*models.News, error) {
+func (r *queryResolver) News(ctx context.Context, newsID string) (*models.News, error) {
 	return &mocked_data.MockNews1, nil
 }
 
