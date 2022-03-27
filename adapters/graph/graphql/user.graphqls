@@ -17,7 +17,7 @@ type UserWithToken {
 input UserInput {
   username: String! @binding(constraint: "required,max=20")
   email: String!
-  password: String!
+  password: String! @binding(constraint: "required,min=8")
 }
 
 input LoginInput {
