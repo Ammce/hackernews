@@ -73,6 +73,7 @@ func main() {
 	defer db.Close()
 
 	r := gin.Default()
+	r.Use(middleware.CORSMiddleware())
 	r.Use(middleware.SetupContext())
 	r.GET("/health", func(ctx *gin.Context) {
 		ctx.Status(200)
