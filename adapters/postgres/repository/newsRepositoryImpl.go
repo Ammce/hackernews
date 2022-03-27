@@ -26,3 +26,9 @@ func (nr NewsRepositoryImpl) SaveNews(n *news.News) (*news.News, error) {
 		CreatedById: n.CreatedById,
 	}, nil
 }
+
+func NewNewsRepositoryImpl(db *sql.DB) NewsRepositoryImpl {
+	return NewsRepositoryImpl{
+		DB: db,
+	}
+}

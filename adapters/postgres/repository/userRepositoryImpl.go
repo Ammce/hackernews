@@ -98,3 +98,9 @@ func (ur UserRepositoryImpl) GetAllUsers() ([]*user.User, error) {
 
 	return users, nil
 }
+
+func NewUserRepositoryImpl(db *sql.DB) UserRepositoryImpl {
+	return UserRepositoryImpl{
+		DB: db,
+	}
+}

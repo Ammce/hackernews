@@ -31,3 +31,7 @@ func (au AuthServiceImpl) Login(email string, password string) (*UserWithToken, 
 		User:  user,
 	}, nil
 }
+
+func NewAuthServiceImpl(userRepo user.UserRepository) AuthServiceImpl {
+	return AuthServiceImpl{UserRepo: userRepo}
+}

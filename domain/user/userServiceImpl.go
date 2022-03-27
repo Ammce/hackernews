@@ -24,3 +24,9 @@ func (ur UserServiceImpl) GetUser(userId string) (*User, error) {
 func (ur UserServiceImpl) GetUsers() ([]*User, error) {
 	return ur.UserRepo.GetAllUsers()
 }
+
+func NewUserServiceImpl(userRepo UserRepository) UserServiceImpl {
+	return UserServiceImpl{
+		UserRepo: userRepo,
+	}
+}

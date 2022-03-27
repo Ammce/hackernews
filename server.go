@@ -26,12 +26,12 @@ const defaultPort = ":8080"
 func graphqlHandler(db *sql.DB) gin.HandlerFunc {
 	// NewExecutableSchema and Config are in the generated.go file
 	// Resolver is in the resolver.go file
-	userRepo := repositories.UserRepositoryImpl{DB: db}
-	newsRepo := repositories.NewsRepositoryImpl{DB: db}
+	userRepo := repositories.NewUserRepositoryImpl(db)
+	newsRepo := repositories.NewNewsRepositoryImpl(db)
 
-	userService := user.UserServiceImpl{UserRepo: userRepo}
-	authService := auth.AuthServiceImpl{UserRepo: userRepo}
-	newsService := news.NewsServiceImpl{NewsRepo: newsRepo}
+	userService := user.NewUserServiceImpl(userRepo)
+	authService := auth.NewAuthServiceImpl(userRepo)
+	newsService := news.NewNewsServiceImpl(newsRepo)
 
 	domain := graph.DomainGraphQL{
 		UserService: userService,

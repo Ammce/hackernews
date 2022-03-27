@@ -7,3 +7,9 @@ type NewsServiceImpl struct {
 func (ns NewsServiceImpl) CreateNews(n *News) (*News, error) {
 	return ns.NewsRepo.SaveNews(n)
 }
+
+func NewNewsServiceImpl(newsRepo NewsRepository) NewsServiceImpl {
+	return NewsServiceImpl{
+		NewsRepo: newsRepo,
+	}
+}
