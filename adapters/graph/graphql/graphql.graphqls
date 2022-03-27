@@ -1,5 +1,8 @@
 directive @hasRoles(roles: [Role!]) on FIELD_DEFINITION
 directive @isAuth on FIELD_DEFINITION
+directive @binding(
+  constraint: String!
+) on INPUT_FIELD_DEFINITION | ARGUMENT_DEFINITION
 type Query {
   healthcheck: String!
 }

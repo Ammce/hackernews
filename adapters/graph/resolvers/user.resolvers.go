@@ -69,5 +69,4 @@ func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
 	}
 
 	return usersGraphQL, nil
-
 }

@@ -7,4 +7,5 @@ import (
 func SetupDirectives(c *generated.Config) {
 	SetupHasRolesDirective(c)
 	SetupIsAuthDirective(c)
+	SetupBindingDirective(c)
 }
