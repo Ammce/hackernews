@@ -14,6 +14,7 @@ import (
 	graph "github.com/Ammce/hackernews/adapters/graph/resolvers"
 	repositories "github.com/Ammce/hackernews/adapters/postgres/repository"
 	"github.com/Ammce/hackernews/domain/auth"
+	"github.com/Ammce/hackernews/domain/news"
 	"github.com/Ammce/hackernews/domain/user"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -26,12 +27,16 @@ func graphqlHandler(db *sql.DB) gin.HandlerFunc {
 	// NewExecutableSchema and Config are in the generated.go file
 	// Resolver is in the resolver.go file
 	userRepo := repositories.UserRepositoryImpl{DB: db}
+	newsRepo := repositories.NewsRepositoryImpl{DB: db}
+
 	userService := user.UserServiceImpl{UserRepo: userRepo}
 	authService := auth.AuthServiceImpl{UserRepo: userRepo}
+	newsService := news.NewsServiceImpl{NewsRepo: newsRepo}
 
 	domain := graph.DomainGraphQL{
 		UserService: userService,
 		AuthService: authService,
+		NewsService: newsService,
 	}
 
 	c := generated.Config{Resolvers: &graph.Resolver{DB: db, Domain: domain, UserDataLoader: graph.UserDataLoader(db)}}

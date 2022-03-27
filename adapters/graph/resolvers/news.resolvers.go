@@ -6,9 +6,9 @@ package graph
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/Ammce/hackernews/adapters/graph/generated"
+	"github.com/Ammce/hackernews/adapters/graph/mappers"
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	"github.com/Ammce/hackernews/adapters/graph/models/inputs"
 	mocked_data "github.com/Ammce/hackernews/mock"
@@ -16,19 +16,11 @@ import (
 )
 
 func (r *mutationResolver) CreateNews(ctx context.Context, input inputs.NewsInput) (*models.News, error) {
-	sqlStatement := `INSERT INTO news (title, text, created_by_id) VALUES ($1, $2, $3) returning id`
-
-	var id int64
-
-	if err := r.DB.QueryRow(sqlStatement, input.Title, input.Text, input.CreatedById).Scan(&id); err != nil {
+	news, err := r.Domain.NewsService.CreateNews(mappers.NewsInputToNewsDomain(&input))
+	if err != nil {
 		return nil, err
 	}
-	return &models.News{
-		ID:          strconv.FormatInt(id, 10),
-		Text:        input.Text,
-		Title:       input.Title,
-		CreatedById: input.CreatedById,
-	}, nil
+	return mappers.NewsDomainToNewsGraphQ(news), nil
 }
 
 func (r *newsResolver) CreatedBy(ctx context.Context, obj *models.News) (*models.User, error) {
