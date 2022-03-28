@@ -14,7 +14,7 @@ func NewsInputToNewsDomain(newsInput *inputs.NewsInput) *news.News {
 	}
 }
 
-func NewsDomainToNewsGraphQ(newsDomain *news.News) *models.News {
+func NewsDomainToNewsGraphQL(newsDomain *news.News) *models.News {
 	return &models.News{
 		ID:           newsDomain.ID,
 		Title:        newsDomain.Title,

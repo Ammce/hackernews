@@ -3,6 +3,7 @@ package graph
 import (
 	"database/sql"
 
+	"github.com/Ammce/hackernews/adapters/graph"
 	"github.com/graph-gophers/dataloader"
 )
 
@@ -11,6 +12,6 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 type Resolver struct {
 	DB             *sql.DB
-	Domain         DomainGraphQL
+	Domain         graph.DomainGraphQL
 	UserDataLoader *dataloader.Loader
 }

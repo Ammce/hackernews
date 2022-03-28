@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/Ammce/hackernews/adapters/graph/generated"
@@ -20,7 +21,7 @@ func (r *mutationResolver) CreateNews(ctx context.Context, input inputs.NewsInpu
 	if err != nil {
 		return nil, err
 	}
-	return mappers.NewsDomainToNewsGraphQ(news), nil
+	return mappers.NewsDomainToNewsGraphQL(news), nil
 }
 
 func (r *newsResolver) CreatedBy(ctx context.Context, obj *models.News) (*models.User, error) {
@@ -53,32 +54,27 @@ func (r *newsResolver) Comments(ctx context.Context, obj *models.News) ([]*model
 }
 
 func (r *queryResolver) News(ctx context.Context, newsID string) (*models.News, error) {
-	return &mocked_data.MockNews1, nil
+	news, errD := r.Domain.NewsService.GetNewsById(newsID)
+	if errD != nil {
+		return nil, errors.New("error getting the domain news")
+	}
+	return mappers.NewsDomainToNewsGraphQL(news), nil
 }
 
 func (r *queryResolver) AllNews(ctx context.Context) ([]*models.News, error) {
-	sqlStatement := `SELECT id, text, title, created_by_id FROM news`
 
-	rows, err := r.DB.Query(sqlStatement)
-
-	if err != nil {
-		return nil, err
+	allDomainNews, errD := r.Domain.NewsService.GetAllNews()
+	if errD != nil {
+		return nil, errors.New("error getting the domain news")
 	}
 
-	var allNews []*models.News
+	var allGqlNews []*models.News
 
-	for rows.Next() {
-		var news models.News
-		err := rows.Scan(&news.ID, &news.Text, &news.Title, &news.CreatedById)
-		if err != nil {
-			return nil, err
-		}
-		allNews = append(allNews, &news)
+	for _, dn := range allDomainNews {
+		allGqlNews = append(allGqlNews, mappers.NewsDomainToNewsGraphQL(dn))
 	}
 
-	defer rows.Close()
-
-	return allNews, nil
+	return allGqlNews, nil
 }
 
 // News returns generated.NewsResolver implementation.
