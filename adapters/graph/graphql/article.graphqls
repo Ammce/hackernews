@@ -1,4 +1,4 @@
-type News {
+type Article {
   id: ID!
   title: String!
   text: String!
@@ -11,17 +11,17 @@ type News {
   comments: [Comment!]
 }
 
-input NewsInput {
+input ArticleInput {
   title: String!
   text: String!
   createdById: ID!
 }
 
 extend type Query {
-  news(newsId: String!): News!
-  allNews: [News!]
+  article(articleId: String!): Article!
+  articles: [Article!]
 }
 
 extend type Mutation {
-  createNews(input: NewsInput!): News!
+  createArticle(input: ArticleInput!): Article!
 }

@@ -2,10 +2,10 @@ type Comment {
   id: ID!
   text: String!
   createdById: ID!
-  newsId: ID!
+  articleId: ID!
   createdAt: String!
   createdBy: User!
-  news: News!
+  article: Article!
   ipAddress: String!
 }
 

@@ -1,6 +1,6 @@
 package inputs
 
-type NewsInput struct {
+type ArticleInput struct {
 	Title       string
 	Text        string
 	CreatedById string

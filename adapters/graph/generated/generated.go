@@ -37,9 +37,9 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Article() ArticleResolver
 	Comment() CommentResolver
 	Mutation() MutationResolver
-	News() NewsResolver
 	Query() QueryResolver
 }
 
@@ -50,25 +50,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Comment struct {
-		CreatedAt   func(childComplexity int) int
-		CreatedBy   func(childComplexity int) int
-		CreatedById func(childComplexity int) int
-		ID          func(childComplexity int) int
-		IPAddress   func(childComplexity int) int
-		News        func(childComplexity int) int
-		NewsId      func(childComplexity int) int
-		Text        func(childComplexity int) int
-	}
-
-	Mutation struct {
-		CreateNews         func(childComplexity int, input inputs.NewsInput) int
-		CreateUser         func(childComplexity int, input *inputs.UserInput) int
-		HealtcheckMutation func(childComplexity int, str string) int
-		Login              func(childComplexity int, input inputs.LoginInput) int
-	}
-
-	News struct {
+	Article struct {
 		ApprovedBy   func(childComplexity int) int
 		ApprovedById func(childComplexity int) int
 		Comments     func(childComplexity int) int
@@ -81,12 +63,30 @@ type ComplexityRoot struct {
 		Title        func(childComplexity int) int
 	}
 
+	Comment struct {
+		Article     func(childComplexity int) int
+		ArticleID   func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		CreatedBy   func(childComplexity int) int
+		CreatedById func(childComplexity int) int
+		ID          func(childComplexity int) int
+		IPAddress   func(childComplexity int) int
+		Text        func(childComplexity int) int
+	}
+
+	Mutation struct {
+		CreateArticle      func(childComplexity int, input inputs.ArticleInput) int
+		CreateUser         func(childComplexity int, input *inputs.UserInput) int
+		HealtcheckMutation func(childComplexity int, str string) int
+		Login              func(childComplexity int, input inputs.LoginInput) int
+	}
+
 	Query struct {
-		AllNews     func(childComplexity int) int
+		Article     func(childComplexity int, articleID string) int
+		Articles    func(childComplexity int) int
 		Comment     func(childComplexity int) int
 		Comments    func(childComplexity int) int
 		Healthcheck func(childComplexity int) int
-		News        func(childComplexity int, newsID string) int
 		Self        func(childComplexity int) int
 		User        func(childComplexity int, userID string) int
 		Users       func(childComplexity int) int
@@ -104,28 +104,30 @@ type ComplexityRoot struct {
 	}
 }
 
+type ArticleResolver interface {
+	CreatedBy(ctx context.Context, obj *models.Article) (*models.User, error)
+	ApprovedBy(ctx context.Context, obj *models.Article) (*models.User, error)
+	Comments(ctx context.Context, obj *models.Article) ([]*models.Comment, error)
+}
 type CommentResolver interface {
+	ArticleID(ctx context.Context, obj *models.Comment) (string, error)
+
 	CreatedBy(ctx context.Context, obj *models.Comment) (*models.User, error)
-	News(ctx context.Context, obj *models.Comment) (*models.News, error)
+	Article(ctx context.Context, obj *models.Comment) (*models.Article, error)
 	IPAddress(ctx context.Context, obj *models.Comment) (string, error)
 }
 type MutationResolver interface {
 	HealtcheckMutation(ctx context.Context, str string) (string, error)
-	CreateNews(ctx context.Context, input inputs.NewsInput) (*models.News, error)
+	CreateArticle(ctx context.Context, input inputs.ArticleInput) (*models.Article, error)
 	CreateUser(ctx context.Context, input *inputs.UserInput) (*models.User, error)
 	Login(ctx context.Context, input inputs.LoginInput) (*models.UserWithToken, error)
 }
-type NewsResolver interface {
-	CreatedBy(ctx context.Context, obj *models.News) (*models.User, error)
-	ApprovedBy(ctx context.Context, obj *models.News) (*models.User, error)
-	Comments(ctx context.Context, obj *models.News) ([]*models.Comment, error)
-}
 type QueryResolver interface {
 	Healthcheck(ctx context.Context) (string, error)
+	Article(ctx context.Context, articleID string) (*models.Article, error)
+	Articles(ctx context.Context) ([]*models.Article, error)
 	Comment(ctx context.Context) (*models.Comment, error)
 	Comments(ctx context.Context) ([]*models.Comment, error)
-	News(ctx context.Context, newsID string) (*models.News, error)
-	AllNews(ctx context.Context) ([]*models.News, error)
 	User(ctx context.Context, userID string) (*models.User, error)
 	Self(ctx context.Context) (*models.User, error)
 	Users(ctx context.Context) ([]*models.User, error)
@@ -145,6 +147,90 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Article.approvedBy":
+		if e.complexity.Article.ApprovedBy == nil {
+			break
+		}
+
+		return e.complexity.Article.ApprovedBy(childComplexity), true
+
+	case "Article.approvedById":
+		if e.complexity.Article.ApprovedById == nil {
+			break
+		}
+
+		return e.complexity.Article.ApprovedById(childComplexity), true
+
+	case "Article.comments":
+		if e.complexity.Article.Comments == nil {
+			break
+		}
+
+		return e.complexity.Article.Comments(childComplexity), true
+
+	case "Article.createdAt":
+		if e.complexity.Article.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Article.CreatedAt(childComplexity), true
+
+	case "Article.createdBy":
+		if e.complexity.Article.CreatedBy == nil {
+			break
+		}
+
+		return e.complexity.Article.CreatedBy(childComplexity), true
+
+	case "Article.createdById":
+		if e.complexity.Article.CreatedById == nil {
+			break
+		}
+
+		return e.complexity.Article.CreatedById(childComplexity), true
+
+	case "Article.id":
+		if e.complexity.Article.ID == nil {
+			break
+		}
+
+		return e.complexity.Article.ID(childComplexity), true
+
+	case "Article.published":
+		if e.complexity.Article.Published == nil {
+			break
+		}
+
+		return e.complexity.Article.Published(childComplexity), true
+
+	case "Article.text":
+		if e.complexity.Article.Text == nil {
+			break
+		}
+
+		return e.complexity.Article.Text(childComplexity), true
+
+	case "Article.title":
+		if e.complexity.Article.Title == nil {
+			break
+		}
+
+		return e.complexity.Article.Title(childComplexity), true
+
+	case "Comment.article":
+		if e.complexity.Comment.Article == nil {
+			break
+		}
+
+		return e.complexity.Comment.Article(childComplexity), true
+
+	case "Comment.articleId":
+		if e.complexity.Comment.ArticleID == nil {
+			break
+		}
+
+		return e.complexity.Comment.ArticleID(childComplexity), true
 
 	case "Comment.createdAt":
 		if e.complexity.Comment.CreatedAt == nil {
@@ -181,20 +267,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.IPAddress(childComplexity), true
 
-	case "Comment.news":
-		if e.complexity.Comment.News == nil {
-			break
-		}
-
-		return e.complexity.Comment.News(childComplexity), true
-
-	case "Comment.newsId":
-		if e.complexity.Comment.NewsId == nil {
-			break
-		}
-
-		return e.complexity.Comment.NewsId(childComplexity), true
-
 	case "Comment.text":
 		if e.complexity.Comment.Text == nil {
 			break
@@ -202,17 +274,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.Text(childComplexity), true
 
-	case "Mutation.createNews":
-		if e.complexity.Mutation.CreateNews == nil {
+	case "Mutation.createArticle":
+		if e.complexity.Mutation.CreateArticle == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_createNews_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_createArticle_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateNews(childComplexity, args["input"].(inputs.NewsInput)), true
+		return e.complexity.Mutation.CreateArticle(childComplexity, args["input"].(inputs.ArticleInput)), true
 
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
@@ -250,82 +322,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Login(childComplexity, args["input"].(inputs.LoginInput)), true
 
-	case "News.approvedBy":
-		if e.complexity.News.ApprovedBy == nil {
+	case "Query.article":
+		if e.complexity.Query.Article == nil {
 			break
 		}
 
-		return e.complexity.News.ApprovedBy(childComplexity), true
+		args, err := ec.field_Query_article_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
 
-	case "News.approvedById":
-		if e.complexity.News.ApprovedById == nil {
+		return e.complexity.Query.Article(childComplexity, args["articleId"].(string)), true
+
+	case "Query.articles":
+		if e.complexity.Query.Articles == nil {
 			break
 		}
 
-		return e.complexity.News.ApprovedById(childComplexity), true
-
-	case "News.comments":
-		if e.complexity.News.Comments == nil {
-			break
-		}
-
-		return e.complexity.News.Comments(childComplexity), true
-
-	case "News.createdAt":
-		if e.complexity.News.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.News.CreatedAt(childComplexity), true
-
-	case "News.createdBy":
-		if e.complexity.News.CreatedBy == nil {
-			break
-		}
-
-		return e.complexity.News.CreatedBy(childComplexity), true
-
-	case "News.createdById":
-		if e.complexity.News.CreatedById == nil {
-			break
-		}
-
-		return e.complexity.News.CreatedById(childComplexity), true
-
-	case "News.id":
-		if e.complexity.News.ID == nil {
-			break
-		}
-
-		return e.complexity.News.ID(childComplexity), true
-
-	case "News.published":
-		if e.complexity.News.Published == nil {
-			break
-		}
-
-		return e.complexity.News.Published(childComplexity), true
-
-	case "News.text":
-		if e.complexity.News.Text == nil {
-			break
-		}
-
-		return e.complexity.News.Text(childComplexity), true
-
-	case "News.title":
-		if e.complexity.News.Title == nil {
-			break
-		}
-
-		return e.complexity.News.Title(childComplexity), true
-
-	case "Query.allNews":
-		if e.complexity.Query.AllNews == nil {
-			break
-		}
-
-		return e.complexity.Query.AllNews(childComplexity), true
+		return e.complexity.Query.Articles(childComplexity), true
 
 	case "Query.comment":
 		if e.complexity.Query.Comment == nil {
@@ -347,18 +361,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Healthcheck(childComplexity), true
-
-	case "Query.news":
-		if e.complexity.Query.News == nil {
-			break
-		}
-
-		args, err := ec.field_Query_news_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.News(childComplexity, args["newsId"].(string)), true
 
 	case "Query.self":
 		if e.complexity.Query.Self == nil {
@@ -485,14 +487,42 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	{Name: "adapters/graph/graphql/article.graphqls", Input: `type Article {
+  id: ID!
+  title: String!
+  text: String!
+  published: Boolean!
+  createdById: ID!
+  approvedById: ID!
+  createdAt: String!
+  createdBy: User!
+  approvedBy: User!
+  comments: [Comment!]
+}
+
+input ArticleInput {
+  title: String!
+  text: String!
+  createdById: ID!
+}
+
+extend type Query {
+  article(articleId: String!): Article!
+  articles: [Article!]
+}
+
+extend type Mutation {
+  createArticle(input: ArticleInput!): Article!
+}
+`, BuiltIn: false},
 	{Name: "adapters/graph/graphql/comment.graphqls", Input: `type Comment {
   id: ID!
   text: String!
   createdById: ID!
-  newsId: ID!
+  articleId: ID!
   createdAt: String!
   createdBy: User!
-  news: News!
+  article: Article!
   ipAddress: String!
 }
 
@@ -512,34 +542,6 @@ type Query {
 
 type Mutation {
   healtcheckMutation(str: String!): String!
-}
-`, BuiltIn: false},
-	{Name: "adapters/graph/graphql/news.graphqls", Input: `type News {
-  id: ID!
-  title: String!
-  text: String!
-  published: Boolean!
-  createdById: ID!
-  approvedById: ID!
-  createdAt: String!
-  createdBy: User!
-  approvedBy: User!
-  comments: [Comment!]
-}
-
-input NewsInput {
-  title: String!
-  text: String!
-  createdById: ID!
-}
-
-extend type Query {
-  news(newsId: String!): News!
-  allNews: [News!]
-}
-
-extend type Mutation {
-  createNews(input: NewsInput!): News!
 }
 `, BuiltIn: false},
 	{Name: "adapters/graph/graphql/user.graphqls", Input: `enum Role {
@@ -617,13 +619,13 @@ func (ec *executionContext) dir_hasRoles_args(ctx context.Context, rawArgs map[s
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createNews_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_createArticle_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 inputs.NewsInput
+	var arg0 inputs.ArticleInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewsInput2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐNewsInput(ctx, tmp)
+		arg0, err = ec.unmarshalNArticleInput2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐArticleInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -692,18 +694,18 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_news_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_article_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["newsId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newsId"))
+	if tmp, ok := rawArgs["articleId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("articleId"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["newsId"] = arg0
+	args["articleId"] = arg0
 	return args, nil
 }
 
@@ -759,6 +761,353 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _Article_id(ctx context.Context, field graphql.CollectedField, obj *models.Article) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Article",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Article_title(ctx context.Context, field graphql.CollectedField, obj *models.Article) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Article",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Article_text(ctx context.Context, field graphql.CollectedField, obj *models.Article) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Article",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Text, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Article_published(ctx context.Context, field graphql.CollectedField, obj *models.Article) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Article",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Published, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Article_createdById(ctx context.Context, field graphql.CollectedField, obj *models.Article) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Article",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedById, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Article_approvedById(ctx context.Context, field graphql.CollectedField, obj *models.Article) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Article",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ApprovedById, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Article_createdAt(ctx context.Context, field graphql.CollectedField, obj *models.Article) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Article",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Article_createdBy(ctx context.Context, field graphql.CollectedField, obj *models.Article) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Article",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Article().CreatedBy(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Article_approvedBy(ctx context.Context, field graphql.CollectedField, obj *models.Article) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Article",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Article().ApprovedBy(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Article_comments(ctx context.Context, field graphql.CollectedField, obj *models.Article) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Article",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Article().Comments(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Comment)
+	fc.Result = res
+	return ec.marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐCommentᚄ(ctx, field.Selections, res)
+}
 
 func (ec *executionContext) _Comment_id(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
 	defer func() {
@@ -865,7 +1214,7 @@ func (ec *executionContext) _Comment_createdById(ctx context.Context, field grap
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Comment_newsId(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
+func (ec *executionContext) _Comment_articleId(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -876,14 +1225,14 @@ func (ec *executionContext) _Comment_newsId(ctx context.Context, field graphql.C
 		Object:     "Comment",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.NewsId, nil
+		return ec.resolvers.Comment().ArticleID(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -970,7 +1319,7 @@ func (ec *executionContext) _Comment_createdBy(ctx context.Context, field graphq
 	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Comment_news(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
+func (ec *executionContext) _Comment_article(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -988,7 +1337,7 @@ func (ec *executionContext) _Comment_news(ctx context.Context, field graphql.Col
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Comment().News(rctx, obj)
+		return ec.resolvers.Comment().Article(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1000,9 +1349,9 @@ func (ec *executionContext) _Comment_news(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.News)
+	res := resTmp.(*models.Article)
 	fc.Result = res
-	return ec.marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNews(ctx, field.Selections, res)
+	return ec.marshalNArticle2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐArticle(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Comment_ipAddress(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
@@ -1082,7 +1431,7 @@ func (ec *executionContext) _Mutation_healtcheckMutation(ctx context.Context, fi
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_createNews(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_createArticle(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1099,7 +1448,7 @@ func (ec *executionContext) _Mutation_createNews(ctx context.Context, field grap
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createNews_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_createArticle_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1107,7 +1456,7 @@ func (ec *executionContext) _Mutation_createNews(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateNews(rctx, args["input"].(inputs.NewsInput))
+		return ec.resolvers.Mutation().CreateArticle(rctx, args["input"].(inputs.ArticleInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1119,9 +1468,9 @@ func (ec *executionContext) _Mutation_createNews(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.News)
+	res := resTmp.(*models.Article)
 	fc.Result = res
-	return ec.marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNews(ctx, field.Selections, res)
+	return ec.marshalNArticle2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐArticle(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1235,353 +1584,6 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 	return ec.marshalOUserWithToken2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUserWithToken(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _News_id(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "News",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _News_title(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "News",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Title, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _News_text(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "News",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Text, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _News_published(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "News",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Published, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _News_createdById(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "News",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedById, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _News_approvedById(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "News",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ApprovedById, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _News_createdAt(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "News",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _News_createdBy(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "News",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.News().CreatedBy(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*models.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _News_approvedBy(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "News",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.News().ApprovedBy(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*models.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _News_comments(ctx context.Context, field graphql.CollectedField, obj *models.News) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "News",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.News().Comments(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*models.Comment)
-	fc.Result = res
-	return ec.marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐCommentᚄ(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_healthcheck(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1615,6 +1617,80 @@ func (ec *executionContext) _Query_healthcheck(ctx context.Context, field graphq
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_article(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_article_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Article(rctx, args["articleId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Article)
+	fc.Result = res
+	return ec.marshalNArticle2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐArticle(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_articles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Articles(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Article)
+	fc.Result = res
+	return ec.marshalOArticle2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐArticleᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_comment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1682,80 +1758,6 @@ func (ec *executionContext) _Query_comments(ctx context.Context, field graphql.C
 	res := resTmp.([]*models.Comment)
 	fc.Result = res
 	return ec.marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐCommentᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_news(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_news_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().News(rctx, args["newsId"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*models.News)
-	fc.Result = res
-	return ec.marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNews(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_allNews(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().AllNews(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*models.News)
-	fc.Result = res
-	return ec.marshalONews2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNewsᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3379,39 +3381,8 @@ func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field gr
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputLoginInput(ctx context.Context, obj interface{}) (inputs.LoginInput, error) {
-	var it inputs.LoginInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	for k, v := range asMap {
-		switch k {
-		case "email":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-			it.Email, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "password":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
-			it.Password, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputNewsInput(ctx context.Context, obj interface{}) (inputs.NewsInput, error) {
-	var it inputs.NewsInput
+func (ec *executionContext) unmarshalInputArticleInput(ctx context.Context, obj interface{}) (inputs.ArticleInput, error) {
+	var it inputs.ArticleInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -3440,6 +3411,37 @@ func (ec *executionContext) unmarshalInputNewsInput(ctx context.Context, obj int
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdById"))
 			it.CreatedById, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputLoginInput(ctx context.Context, obj interface{}) (inputs.LoginInput, error) {
+	var it inputs.LoginInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "password":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			it.Password, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3532,6 +3534,154 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 
 // region    **************************** object.gotpl ****************************
 
+var articleImplementors = []string{"Article"}
+
+func (ec *executionContext) _Article(ctx context.Context, sel ast.SelectionSet, obj *models.Article) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, articleImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Article")
+		case "id":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Article_id(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "title":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Article_title(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "text":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Article_text(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "published":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Article_published(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "createdById":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Article_createdById(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "approvedById":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Article_approvedById(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "createdAt":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Article_createdAt(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "createdBy":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Article_createdBy(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "approvedBy":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Article_approvedBy(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "comments":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Article_comments(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var commentImplementors = []string{"Comment"}
 
 func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, obj *models.Comment) graphql.Marshaler {
@@ -3572,16 +3722,26 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "newsId":
+		case "articleId":
+			field := field
+
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Comment_newsId(ctx, field, obj)
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Comment_articleId(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			})
 		case "createdAt":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Comment_createdAt(ctx, field, obj)
@@ -3612,7 +3772,7 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 				return innerFunc(ctx)
 
 			})
-		case "news":
+		case "article":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3621,7 +3781,7 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Comment_news(ctx, field, obj)
+				res = ec._Comment_article(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -3692,9 +3852,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "createNews":
+		case "createArticle":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createNews(ctx, field)
+				return ec._Mutation_createArticle(ctx, field)
 			}
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
@@ -3719,154 +3879,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
 
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var newsImplementors = []string{"News"}
-
-func (ec *executionContext) _News(ctx context.Context, sel ast.SelectionSet, obj *models.News) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, newsImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("News")
-		case "id":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._News_id(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "title":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._News_title(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "text":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._News_text(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "published":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._News_published(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "createdById":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._News_createdById(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "approvedById":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._News_approvedById(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "createdAt":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._News_createdAt(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "createdBy":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._News_createdBy(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
-		case "approvedBy":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._News_approvedBy(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
-		case "comments":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._News_comments(ctx, field, obj)
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3920,6 +3932,49 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
+		case "article":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_article(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "articles":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_articles(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
 		case "comment":
 			field := field
 
@@ -3953,49 +4008,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_comments(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "news":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_news(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "allNews":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_allNews(ctx, field)
 				return res
 			}
 
@@ -4612,6 +4624,25 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNArticle2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐArticle(ctx context.Context, sel ast.SelectionSet, v models.Article) graphql.Marshaler {
+	return ec._Article(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNArticle2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐArticle(ctx context.Context, sel ast.SelectionSet, v *models.Article) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Article(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNArticleInput2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐArticleInput(ctx context.Context, v interface{}) (inputs.ArticleInput, error) {
+	res, err := ec.unmarshalInputArticleInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4658,25 +4689,6 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 
 func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐLoginInput(ctx context.Context, v interface{}) (inputs.LoginInput, error) {
 	res, err := ec.unmarshalInputLoginInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNNews2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNews(ctx context.Context, sel ast.SelectionSet, v models.News) graphql.Marshaler {
-	return ec._News(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNews(ctx context.Context, sel ast.SelectionSet, v *models.News) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._News(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNNewsInput2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐNewsInput(ctx context.Context, v interface{}) (inputs.NewsInput, error) {
-	res, err := ec.unmarshalInputNewsInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -4972,6 +4984,53 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) marshalOArticle2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐArticleᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Article) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNArticle2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐArticle(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5026,53 +5085,6 @@ func (ec *executionContext) marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackern
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNComment2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐComment(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalONews2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNewsᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.News) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNNews2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐNews(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

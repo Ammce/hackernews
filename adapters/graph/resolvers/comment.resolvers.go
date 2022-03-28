@@ -5,18 +5,23 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Ammce/hackernews/adapters/graph/generated"
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	mocked_data "github.com/Ammce/hackernews/mock"
 )
 
+func (r *commentResolver) ArticleID(ctx context.Context, obj *models.Comment) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *commentResolver) CreatedBy(ctx context.Context, obj *models.Comment) (*models.User, error) {
 	return &mocked_data.MockUser, nil
 }
 
-func (r *commentResolver) News(ctx context.Context, obj *models.Comment) (*models.News, error) {
-	return &mocked_data.MockNews1, nil
+func (r *commentResolver) Article(ctx context.Context, obj *models.Comment) (*models.Article, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *commentResolver) IPAddress(ctx context.Context, obj *models.Comment) (string, error) {

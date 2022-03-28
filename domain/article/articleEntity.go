@@ -1,6 +1,6 @@
-package news
+package article
 
-type News struct {
+type Article struct {
 	ID           string
 	Title        string
 	Text         string

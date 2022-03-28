@@ -1,6 +1,6 @@
 package models
 
-type News struct {
+type Article struct {
 	ID           string `json:"id"`
 	Text         string `json:"text"`
 	Title        string `json:"title"`

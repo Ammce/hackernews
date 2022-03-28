@@ -63,10 +63,10 @@ models:
     model: github.com/Ammce/hackernews/adapters/graph/models.UserWithToken
   UserInput:
     model: github.com/Ammce/hackernews/adapters/graph/models/inputs.UserInput
-  News:
-    model: github.com/Ammce/hackernews/adapters/graph/models.News
-  NewsInput:
-    model: github.com/Ammce/hackernews/adapters/graph/models/inputs.NewsInput
+  Article:
+    model: github.com/Ammce/hackernews/adapters/graph/models.Article
+  ArticleInput:
+    model: github.com/Ammce/hackernews/adapters/graph/models/inputs.ArticleInput
   LoginInput:
     model: github.com/Ammce/hackernews/adapters/graph/models/inputs.LoginInput
   Comment:

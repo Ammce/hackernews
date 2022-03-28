@@ -26,7 +26,7 @@ var CommentMock2 = models.Comment{
 
 var AllComments = []*models.Comment{&CommentMock1, &CommentMock2}
 
-var MockNews1 = models.News{
+var MockNews1 = models.Article{
 	ID:           "345",
 	Title:        "Russia attacks Ukraine",
 	Text:         "Russia is about to attack Kyiv and all other major cities in Ukraine.",
@@ -36,7 +36,7 @@ var MockNews1 = models.News{
 	ApprovedById: "123",
 }
 
-var MockNews2 = models.News{
+var MockNews2 = models.Article{
 	ID:           "555",
 	Title:        "Dol;ar is rising",
 	Text:         "Due to the war crimes, dollar is rising up.",
@@ -46,4 +46,4 @@ var MockNews2 = models.News{
 	ApprovedById: "123",
 }
 
-var News = []*models.News{&MockNews1, &MockNews2}
+var News = []*models.Article{&MockNews1, &MockNews2}
