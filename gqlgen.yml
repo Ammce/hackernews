@@ -73,6 +73,8 @@ models:
     model: github.com/Ammce/hackernews/adapters/graph/models/inputs.LoginInput
   Comment:
     model: github.com/Ammce/hackernews/adapters/graph/models.Comment
+  CommentInput:
+    model: github.com/Ammce/hackernews/adapters/graph/models/inputs.CommentInput
     fields:
       ipAddress:
         resolver: true

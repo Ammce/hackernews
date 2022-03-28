@@ -9,7 +9,17 @@ type Comment {
   ipAddress: String!
 }
 
+input CommentInput {
+  text: String!
+  createdById: ID!
+  articleId: ID!
+}
+
 extend type Query {
-  comment: Comment!
+  comment(commentId: String!): Comment!
   comments: [Comment!]
+}
+
+extend type Mutation {
+  createComment(input: CommentInput!): Comment!
 }

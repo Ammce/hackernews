@@ -65,7 +65,7 @@ type ComplexityRoot struct {
 
 	Comment struct {
 		Article     func(childComplexity int) int
-		ArticleID   func(childComplexity int) int
+		ArticleId   func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
 		CreatedBy   func(childComplexity int) int
 		CreatedById func(childComplexity int) int
@@ -76,6 +76,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateArticle      func(childComplexity int, input inputs.ArticleInput) int
+		CreateComment      func(childComplexity int, input inputs.CommentInput) int
 		CreateUser         func(childComplexity int, input *inputs.UserInput) int
 		HealtcheckMutation func(childComplexity int, str string) int
 		Login              func(childComplexity int, input inputs.LoginInput) int
@@ -84,7 +85,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Article     func(childComplexity int, articleID string) int
 		Articles    func(childComplexity int, filter *inputs.ArticleFilterInput) int
-		Comment     func(childComplexity int) int
+		Comment     func(childComplexity int, commentID string) int
 		Comments    func(childComplexity int) int
 		Healthcheck func(childComplexity int) int
 		Self        func(childComplexity int) int
@@ -110,8 +111,7 @@ type ArticleResolver interface {
 	Comments(ctx context.Context, obj *models.Article) ([]*models.Comment, error)
 }
 type CommentResolver interface {
-	ArticleID(ctx context.Context, obj *models.Comment) (string, error)
-
+	CreatedAt(ctx context.Context, obj *models.Comment) (string, error)
 	CreatedBy(ctx context.Context, obj *models.Comment) (*models.User, error)
 	Article(ctx context.Context, obj *models.Comment) (*models.Article, error)
 	IPAddress(ctx context.Context, obj *models.Comment) (string, error)
@@ -119,6 +119,7 @@ type CommentResolver interface {
 type MutationResolver interface {
 	HealtcheckMutation(ctx context.Context, str string) (string, error)
 	CreateArticle(ctx context.Context, input inputs.ArticleInput) (*models.Article, error)
+	CreateComment(ctx context.Context, input inputs.CommentInput) (*models.Comment, error)
 	CreateUser(ctx context.Context, input *inputs.UserInput) (*models.User, error)
 	Login(ctx context.Context, input inputs.LoginInput) (*models.UserWithToken, error)
 }
@@ -126,7 +127,7 @@ type QueryResolver interface {
 	Healthcheck(ctx context.Context) (string, error)
 	Article(ctx context.Context, articleID string) (*models.Article, error)
 	Articles(ctx context.Context, filter *inputs.ArticleFilterInput) ([]*models.Article, error)
-	Comment(ctx context.Context) (*models.Comment, error)
+	Comment(ctx context.Context, commentID string) (*models.Comment, error)
 	Comments(ctx context.Context) ([]*models.Comment, error)
 	User(ctx context.Context, userID string) (*models.User, error)
 	Self(ctx context.Context) (*models.User, error)
@@ -226,11 +227,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Comment.Article(childComplexity), true
 
 	case "Comment.articleId":
-		if e.complexity.Comment.ArticleID == nil {
+		if e.complexity.Comment.ArticleId == nil {
 			break
 		}
 
-		return e.complexity.Comment.ArticleID(childComplexity), true
+		return e.complexity.Comment.ArticleId(childComplexity), true
 
 	case "Comment.createdAt":
 		if e.complexity.Comment.CreatedAt == nil {
@@ -285,6 +286,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateArticle(childComplexity, args["input"].(inputs.ArticleInput)), true
+
+	case "Mutation.createComment":
+		if e.complexity.Mutation.CreateComment == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createComment_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateComment(childComplexity, args["input"].(inputs.CommentInput)), true
 
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
@@ -351,7 +364,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.Comment(childComplexity), true
+		args, err := ec.field_Query_comment_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Comment(childComplexity, args["commentId"].(string)), true
 
 	case "Query.comments":
 		if e.complexity.Query.Comments == nil {
@@ -535,9 +553,19 @@ extend type Mutation {
   ipAddress: String!
 }
 
+input CommentInput {
+  text: String!
+  createdById: ID!
+  articleId: ID!
+}
+
 extend type Query {
-  comment: Comment!
+  comment(commentId: String!): Comment!
   comments: [Comment!]
+}
+
+extend type Mutation {
+  createComment(input: CommentInput!): Comment!
 }
 `, BuiltIn: false},
 	{Name: "adapters/graph/graphql/graphql.graphqls", Input: `directive @hasRoles(roles: [Role!]) on FIELD_DEFINITION
@@ -643,6 +671,21 @@ func (ec *executionContext) field_Mutation_createArticle_args(ctx context.Contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 inputs.CommentInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNCommentInput2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐCommentInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -730,6 +773,21 @@ func (ec *executionContext) field_Query_articles_args(ctx context.Context, rawAr
 		}
 	}
 	args["filter"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_comment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["commentId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("commentId"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["commentId"] = arg0
 	return args, nil
 }
 
@@ -1249,14 +1307,14 @@ func (ec *executionContext) _Comment_articleId(ctx context.Context, field graphq
 		Object:     "Comment",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Comment().ArticleID(rctx, obj)
+		return obj.ArticleId, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1284,14 +1342,14 @@ func (ec *executionContext) _Comment_createdAt(ctx context.Context, field graphq
 		Object:     "Comment",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
+		return ec.resolvers.Comment().CreatedAt(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1495,6 +1553,48 @@ func (ec *executionContext) _Mutation_createArticle(ctx context.Context, field g
 	res := resTmp.(*models.Article)
 	fc.Result = res
 	return ec.marshalNArticle2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐArticle(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createComment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createComment_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateComment(rctx, args["input"].(inputs.CommentInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Comment)
+	fc.Result = res
+	return ec.marshalNComment2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐComment(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1740,9 +1840,16 @@ func (ec *executionContext) _Query_comment(ctx context.Context, field graphql.Co
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_comment_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Comment(rctx)
+		return ec.resolvers.Query().Comment(rctx, args["commentId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3474,6 +3581,45 @@ func (ec *executionContext) unmarshalInputArticleInput(ctx context.Context, obj 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCommentInput(ctx context.Context, obj interface{}) (inputs.CommentInput, error) {
+	var it inputs.CommentInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "text":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
+			it.Text, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdById":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdById"))
+			it.CreatedById, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "articleId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("articleId"))
+			it.ArticleId, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputLoginInput(ctx context.Context, obj interface{}) (inputs.LoginInput, error) {
 	var it inputs.LoginInput
 	asMap := map[string]interface{}{}
@@ -3777,6 +3923,16 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "articleId":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Comment_articleId(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "createdAt":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3785,7 +3941,7 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Comment_articleId(ctx, field, obj)
+				res = ec._Comment_createdAt(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -3796,16 +3952,6 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 				return innerFunc(ctx)
 
 			})
-		case "createdAt":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Comment_createdAt(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "createdBy":
 			field := field
 
@@ -3909,6 +4055,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "createArticle":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createArticle(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createComment":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createComment(ctx, field)
 			}
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
@@ -4724,6 +4880,11 @@ func (ec *executionContext) marshalNComment2ᚖgithubᚗcomᚋAmmceᚋhackernews
 		return graphql.Null
 	}
 	return ec._Comment(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNCommentInput2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐCommentInput(ctx context.Context, v interface{}) (inputs.CommentInput, error) {
+	res, err := ec.unmarshalInputCommentInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
