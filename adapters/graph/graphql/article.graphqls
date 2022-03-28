@@ -17,9 +17,13 @@ input ArticleInput {
   createdById: ID!
 }
 
+input ArticleFilterInput {
+  createdById: ID!
+}
+
 extend type Query {
   article(articleId: String!): Article!
-  articles: [Article!]
+  articles(filter: ArticleFilterInput): [Article!]
 }
 
 extend type Mutation {

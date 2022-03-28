@@ -11,8 +11,8 @@ func (as ArticleServiceImpl) CreateArticle(a *Article) (*Article, error) {
 func (as ArticleServiceImpl) GetArticleById(articleId string) (*Article, error) {
 	return as.ArticleRepo.GetArticleById(articleId)
 }
-func (as ArticleServiceImpl) GetAllArticles() ([]*Article, error) {
-	return as.ArticleRepo.GetAllArticles()
+func (as ArticleServiceImpl) GetAllArticles(articleFilter *ArticleFilter) ([]*Article, error) {
+	return as.ArticleRepo.GetAllArticles(articleFilter)
 }
 
 func NewArticleServiceImpl(articleRepostiroy ArticleRepository) ArticleServiceImpl {

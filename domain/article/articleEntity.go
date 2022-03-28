@@ -9,3 +9,7 @@ type Article struct {
 	CreatedAt    string
 	ApprovedById string
 }
+
+type ArticleFilter struct {
+	CreatedById string
+}

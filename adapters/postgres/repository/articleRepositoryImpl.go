@@ -41,8 +41,13 @@ func (ar ArticleRepositoryImpl) GetArticleById(articleId string) (*article.Artic
 	return &article, nil
 }
 
-func (ar ArticleRepositoryImpl) GetAllArticles() ([]*article.Article, error) {
+func (ar ArticleRepositoryImpl) GetAllArticles(filter *article.ArticleFilter) ([]*article.Article, error) {
+
 	sqlStatement := `SELECT id, title, text, created_by_id, created_at FROM articles`
+
+	if filter.CreatedById != "" {
+		sqlStatement = fmt.Sprintf(`SELECT id, title, text, created_by_id, created_at FROM articles WHERE created_by_id = %s`, filter.CreatedById)
+	}
 
 	var articles []*article.Article
 

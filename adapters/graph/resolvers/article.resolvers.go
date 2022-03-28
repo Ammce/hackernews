@@ -12,6 +12,7 @@ import (
 	"github.com/Ammce/hackernews/adapters/graph/mappers"
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	"github.com/Ammce/hackernews/adapters/graph/models/inputs"
+	"github.com/Ammce/hackernews/domain/article"
 	"github.com/graph-gophers/dataloader"
 )
 
@@ -54,8 +55,13 @@ func (r *queryResolver) Article(ctx context.Context, articleID string) (*models.
 	return mappers.ArticleDomainToArticleGraphQL(article), nil
 }
 
-func (r *queryResolver) Articles(ctx context.Context) ([]*models.Article, error) {
-	allDomainArticles, errD := r.Domain.ArticleService.GetAllArticles()
+func (r *queryResolver) Articles(ctx context.Context, filter *inputs.ArticleFilterInput) ([]*models.Article, error) {
+	inputFilter := &article.ArticleFilter{}
+	if filter != nil {
+		inputFilter.CreatedById = filter.CreatedById
+	}
+	allDomainArticles, errD := r.Domain.ArticleService.GetAllArticles(inputFilter)
+
 	if errD != nil {
 		return nil, errors.New("error getting the domain news")
 	}

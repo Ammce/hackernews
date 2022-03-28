@@ -83,7 +83,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Article     func(childComplexity int, articleID string) int
-		Articles    func(childComplexity int) int
+		Articles    func(childComplexity int, filter *inputs.ArticleFilterInput) int
 		Comment     func(childComplexity int) int
 		Comments    func(childComplexity int) int
 		Healthcheck func(childComplexity int) int
@@ -125,7 +125,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Healthcheck(ctx context.Context) (string, error)
 	Article(ctx context.Context, articleID string) (*models.Article, error)
-	Articles(ctx context.Context) ([]*models.Article, error)
+	Articles(ctx context.Context, filter *inputs.ArticleFilterInput) ([]*models.Article, error)
 	Comment(ctx context.Context) (*models.Comment, error)
 	Comments(ctx context.Context) ([]*models.Comment, error)
 	User(ctx context.Context, userID string) (*models.User, error)
@@ -339,7 +339,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.Articles(childComplexity), true
+		args, err := ec.field_Query_articles_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Articles(childComplexity, args["filter"].(*inputs.ArticleFilterInput)), true
 
 	case "Query.comment":
 		if e.complexity.Query.Comment == nil {
@@ -506,9 +511,13 @@ input ArticleInput {
   createdById: ID!
 }
 
+input ArticleFilterInput {
+  createdById: ID!
+}
+
 extend type Query {
   article(articleId: String!): Article!
-  articles: [Article!]
+  articles(filter: ArticleFilterInput): [Article!]
 }
 
 extend type Mutation {
@@ -706,6 +715,21 @@ func (ec *executionContext) field_Query_article_args(ctx context.Context, rawArg
 		}
 	}
 	args["articleId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_articles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *inputs.ArticleFilterInput
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalOArticleFilterInput2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐArticleFilterInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
 	return args, nil
 }
 
@@ -1677,9 +1701,16 @@ func (ec *executionContext) _Query_articles(ctx context.Context, field graphql.C
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_articles_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Articles(rctx)
+		return ec.resolvers.Query().Articles(rctx, args["filter"].(*inputs.ArticleFilterInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3381,6 +3412,29 @@ func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field gr
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputArticleFilterInput(ctx context.Context, obj interface{}) (inputs.ArticleFilterInput, error) {
+	var it inputs.ArticleFilterInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "createdById":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdById"))
+			it.CreatedById, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputArticleInput(ctx context.Context, obj interface{}) (inputs.ArticleInput, error) {
 	var it inputs.ArticleInput
 	asMap := map[string]interface{}{}
@@ -5029,6 +5083,14 @@ func (ec *executionContext) marshalOArticle2ᚕᚖgithubᚗcomᚋAmmceᚋhackern
 	}
 
 	return ret
+}
+
+func (ec *executionContext) unmarshalOArticleFilterInput2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚋinputsᚐArticleFilterInput(ctx context.Context, v interface{}) (*inputs.ArticleFilterInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputArticleFilterInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

@@ -67,6 +67,8 @@ models:
     model: github.com/Ammce/hackernews/adapters/graph/models.Article
   ArticleInput:
     model: github.com/Ammce/hackernews/adapters/graph/models/inputs.ArticleInput
+  ArticleFilterInput:
+    model: github.com/Ammce/hackernews/adapters/graph/models/inputs.ArticleFilterInput
   LoginInput:
     model: github.com/Ammce/hackernews/adapters/graph/models/inputs.LoginInput
   Comment:

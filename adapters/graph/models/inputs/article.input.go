@@ -5,3 +5,7 @@ type ArticleInput struct {
 	Text        string
 	CreatedById string
 }
+
+type ArticleFilterInput struct {
+	CreatedById string
+}
