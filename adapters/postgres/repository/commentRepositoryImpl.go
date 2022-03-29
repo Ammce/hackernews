@@ -14,7 +14,7 @@ type CommentRepositoryImpl struct {
 }
 
 func (cr CommentRepositoryImpl) SaveComment(c *comment.Comment) (*comment.Comment, error) {
-	sqlStatement := `INSERT INTO comments (text, created_by_id, article_id) VALUES ($1, $2, $3) returning id created_at`
+	sqlStatement := `INSERT INTO comments (text, created_by_id, article_id) VALUES ($1, $2, $3) returning id, created_at`
 
 	var id int64
 	var createdAt string
@@ -32,6 +32,7 @@ func (cr CommentRepositoryImpl) SaveComment(c *comment.Comment) (*comment.Commen
 }
 
 func (cr CommentRepositoryImpl) GetCommentById(commentId string) (*comment.Comment, error) {
+	fmt.Println(commentId)
 	sqlStatement := fmt.Sprintf(`SELECT id, text, created_by_id, article_id, created_at FROM comments WHERE id = %s`, commentId)
 
 	var comment comment.Comment

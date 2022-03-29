@@ -5,16 +5,23 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/Ammce/hackernews/adapters/graph/generated"
+	"github.com/Ammce/hackernews/adapters/graph/mappers"
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	"github.com/Ammce/hackernews/adapters/graph/models/inputs"
-	mocked_data "github.com/Ammce/hackernews/mock"
+	"github.com/graph-gophers/dataloader"
 )
 
 func (r *commentResolver) CreatedBy(ctx context.Context, obj *models.Comment) (*models.User, error) {
-	return &mocked_data.MockUser, nil
+	thunk := r.UserDataLoader.Load(context.TODO(), dataloader.StringKey(obj.CreatedById)) // StringKey is a convenience method that make wraps string to implement `Key` interface
+	result, err := thunk()
+	if err != nil {
+		fmt.Println("Erro se desio", err)
+	}
+	return result.(*models.User), nil
 }
 
 func (r *commentResolver) Article(ctx context.Context, obj *models.Comment) (*models.Article, error) {
@@ -26,31 +33,38 @@ func (r *commentResolver) IPAddress(ctx context.Context, obj *models.Comment) (s
 }
 
 func (r *mutationResolver) CreateComment(ctx context.Context, input inputs.CommentInput) (*models.Comment, error) {
-	panic(fmt.Errorf("not implemented"))
+	comment, errD := r.Domain.CommentService.CreateComment(mappers.CommentInputToCommentDomain(&input))
+	if errD != nil {
+		return nil, errD
+	}
+	return mappers.CommentDomainToCommentGraphQL(comment), nil
 }
 
 func (r *queryResolver) Comment(ctx context.Context, commentID string) (*models.Comment, error) {
-	return &mocked_data.CommentMock1, nil
+	comment, errD := r.Domain.CommentService.GetCommentById(commentID)
+	if errD != nil {
+		return nil, errors.New("error getting the domain comments")
+	}
+	return mappers.CommentDomainToCommentGraphQL(comment), nil
 }
 
 func (r *queryResolver) Comments(ctx context.Context) ([]*models.Comment, error) {
-	return mocked_data.AllComments, nil
+	allDomainComments, errD := r.Domain.CommentService.GetAllComments()
+
+	if errD != nil {
+		return nil, errors.New("error getting the domain comments")
+	}
+
+	var allGqlComments []*models.Comment
+
+	for _, dc := range allDomainComments {
+		allGqlComments = append(allGqlComments, mappers.CommentDomainToCommentGraphQL(dc))
+	}
+
+	return allGqlComments, nil
 }
 
 // Comment returns generated.CommentResolver implementation.
 func (r *Resolver) Comment() generated.CommentResolver { return &commentResolver{r} }
 
 type commentResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *commentResolver) CreatedAt(ctx context.Context, obj *models.Comment) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *commentResolver) ArticleID(ctx context.Context, obj *models.Comment) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}
