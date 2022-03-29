@@ -32,7 +32,6 @@ func (cr CommentRepositoryImpl) SaveComment(c *comment.Comment) (*comment.Commen
 }
 
 func (cr CommentRepositoryImpl) GetCommentById(commentId string) (*comment.Comment, error) {
-	fmt.Println(commentId)
 	sqlStatement := fmt.Sprintf(`SELECT id, text, created_by_id, article_id, created_at FROM comments WHERE id = %s`, commentId)
 
 	var comment comment.Comment

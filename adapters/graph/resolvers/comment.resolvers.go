@@ -25,7 +25,12 @@ func (r *commentResolver) CreatedBy(ctx context.Context, obj *models.Comment) (*
 }
 
 func (r *commentResolver) Article(ctx context.Context, obj *models.Comment) (*models.Article, error) {
-	panic(fmt.Errorf("not implemented"))
+	thunk := r.ArticleDataLoader.Load(context.TODO(), dataloader.StringKey(obj.ArticleId)) // StringKey is a convenience method that make wraps string to implement `Key` interface
+	result, err := thunk()
+	if err != nil {
+		fmt.Println("Erro se desio", err)
+	}
+	return result.(*models.Article), nil
 }
 
 func (r *commentResolver) IPAddress(ctx context.Context, obj *models.Comment) (string, error) {

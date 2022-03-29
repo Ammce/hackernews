@@ -10,34 +10,34 @@ import (
 	"github.com/graph-gophers/dataloader"
 )
 
-func UserDataLoader(db *sql.DB) *dataloader.Loader {
+func ArticlesDataLoader(db *sql.DB) *dataloader.Loader {
 
 	batchFn := func(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
 		str := strings.Join(keys.Keys(), ", ")
 
-		sqlStatement := fmt.Sprintf("SELECT id, username, email FROM users WHERE id IN (%s)", str)
+		sqlStatement := fmt.Sprintf("SELECT id, title, text, created_by_id, created_at FROM articles WHERE id IN (%s)", str)
 		row, err := db.Query(sqlStatement)
 		if err != nil {
 			return nil
 		}
 
-		var usersSlice []*models.User
+		var articlesSlice []*models.Article
 
 		for row.Next() {
-			var user models.User
-			err := row.Scan(&user.ID, &user.Username, &user.Email)
+			var article models.Article
+			err := row.Scan(&article.ID, &article.Title, &article.Text, &article.CreatedById, &article.CreatedAt)
 			if err != nil {
 				return nil
 			}
-			usersSlice = append(usersSlice, &user)
+			articlesSlice = append(articlesSlice, &article)
 		}
 
 		defer row.Close()
 
-		var u = make(map[string]*models.User, len(keys))
+		var u = make(map[string]*models.Article, len(keys))
 
-		for _, usr := range usersSlice {
-			u[usr.ID] = usr
+		for _, art := range articlesSlice {
+			u[art.ID] = art
 		}
 
 		var results = make([]*dataloader.Result, len(keys))
