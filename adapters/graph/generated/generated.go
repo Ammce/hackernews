@@ -111,7 +111,6 @@ type ArticleResolver interface {
 	Comments(ctx context.Context, obj *models.Article) ([]*models.Comment, error)
 }
 type CommentResolver interface {
-	CreatedAt(ctx context.Context, obj *models.Comment) (string, error)
 	CreatedBy(ctx context.Context, obj *models.Comment) (*models.User, error)
 	Article(ctx context.Context, obj *models.Comment) (*models.Article, error)
 	IPAddress(ctx context.Context, obj *models.Comment) (string, error)
@@ -1342,14 +1341,14 @@ func (ec *executionContext) _Comment_createdAt(ctx context.Context, field graphq
 		Object:     "Comment",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Comment().CreatedAt(rctx, obj)
+		return obj.CreatedAt, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3933,25 +3932,15 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "createdAt":
-			field := field
-
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Comment_createdAt(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+				return ec._Comment_createdAt(ctx, field, obj)
 			}
 
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
+			out.Values[i] = innerFunc(ctx)
 
-			})
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "createdBy":
 			field := field
 

@@ -1,0 +1,9 @@
+CREATE TABLE comments (
+    id BIGSERIAL PRIMARY KEY,
+    text TEXT,
+    created_by_id INTEGER REFERENCES users(id),
+    article_id INTEGER REFERENCES articles(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
+)

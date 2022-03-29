@@ -5,4 +5,5 @@ type Comment struct {
 	Text        string `json:"name"`
 	CreatedById string `json:"createdById"`
 	ArticleId   string `json:"ArticleId"`
+	CreatedAt   string `json:"CreatedAt"`
 }
