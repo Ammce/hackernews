@@ -15,4 +15,5 @@ type Resolver struct {
 	Domain            graph.DomainGraphQL
 	UserDataLoader    *dataloader.Loader
 	ArticleDataLoader *dataloader.Loader
+	CommentDataLoader *dataloader.Loader
 }

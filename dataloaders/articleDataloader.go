@@ -10,7 +10,7 @@ import (
 	"github.com/graph-gophers/dataloader"
 )
 
-func ArticlesDataLoader(db *sql.DB) *dataloader.Loader {
+func ArticleDataLoader(db *sql.DB) *dataloader.Loader {
 
 	batchFn := func(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
 		str := strings.Join(keys.Keys(), ", ")

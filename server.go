@@ -45,7 +45,7 @@ func graphqlHandler(db *sql.DB) gin.HandlerFunc {
 		CommentService: commentService,
 	}
 
-	c := generated.Config{Resolvers: &graph.Resolver{DB: db, Domain: domain, UserDataLoader: dataloaders.UserDataLoader(db), ArticleDataLoader: dataloaders.ArticlesDataLoader(db)}}
+	c := generated.Config{Resolvers: &graph.Resolver{DB: db, Domain: domain, UserDataLoader: dataloaders.UserDataLoader(db), ArticleDataLoader: dataloaders.ArticleDataLoader(db), CommentDataLoader: dataloaders.CommentDataLoader(db)}}
 	directives.SetupDirectives(&c)
 
 	h := handler.NewDefaultServer(generated.NewExecutableSchema(c))

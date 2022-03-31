@@ -36,7 +36,14 @@ func (r *articleResolver) ApprovedBy(ctx context.Context, obj *models.Article) (
 
 func (r *articleResolver) Comments(ctx context.Context, obj *models.Article) ([]*models.Comment, error) {
 	// TODO - Handle comments here. Probably Data loader for comments
-	return nil, nil
+	thunk := r.CommentDataLoader.Load(context.TODO(), dataloader.StringKey(obj.ID)) // StringKey is a convenience method that make wraps string to implement `Key` interface
+	// thunk := r.CommentDataLoader.Load(context.TODO(), dataloader.StringKey("10")) // StringKey is a convenience method that make wraps string to implement `Key` interface
+	result, err := thunk()
+	if err != nil {
+		// fmt.Println("Erro se desio", err)
+	}
+	fmt.Println(result)
+	return result.([]*models.Comment), nil
 }
 
 func (r *mutationResolver) CreateArticle(ctx context.Context, input inputs.ArticleInput) (*models.Article, error) {
