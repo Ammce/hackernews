@@ -57,7 +57,7 @@ func (ur UserRepositoryImpl) GetUserById(userId string) (*user.User, error) {
 }
 
 func (ur UserRepositoryImpl) GetUserByField(field string, fieldValue string) (*user.User, error) {
-	sqlStatement := fmt.Sprintf(`SELECT id, email, username, password FROM users WHERE %v = '%v'`, field, fieldValue)
+	sqlStatement := fmt.Sprintf(`SELECT id, email, username, password FROM users WHERE %s = '%s'`, field, fieldValue)
 	var user user.User
 
 	if err := ur.DB.QueryRow(sqlStatement).Scan(&user.ID, &user.Email, &user.Username, &user.Password); err != nil {

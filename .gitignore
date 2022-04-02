@@ -3,3 +3,4 @@ build-errors.log
 main
 localhost.session.sql
 settings.json
+coverage.out
