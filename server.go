@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -20,6 +21,7 @@ import (
 	"github.com/Ammce/hackernews/domain/comment"
 	"github.com/Ammce/hackernews/domain/user"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -65,6 +67,11 @@ func playgroundHandler() gin.HandlerFunc {
 }
 
 func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error while loading the env variables: %s", err)
+	}
+	fmt.Println("Env variables successfully loaded.", os.Getenv("ENV_HEALTCHECK"))
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
@@ -90,4 +97,5 @@ func main() {
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
+
 }
