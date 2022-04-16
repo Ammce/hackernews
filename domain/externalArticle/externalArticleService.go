@@ -1,5 +1,5 @@
 package externalarticle
 
 type ExternalArticleService interface {
-	getTopArticlesPerCountry(country *string) ([]*ExternalArticle, error)
+	GetTopArticlesPerCountry(country *string) ([]*ExternalArticle, error)
 }

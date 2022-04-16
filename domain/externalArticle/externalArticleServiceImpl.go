@@ -2,7 +2,7 @@ package externalarticle
 
 type ExternalArticleServiceImpl struct{}
 
-func (ea ExternalArticleServiceImpl) getTopArticlesPerCountry(country *string) ([]*ExternalArticle, error) {
+func (ea ExternalArticleServiceImpl) GetTopArticlesPerCountry(country *string) ([]*ExternalArticle, error) {
 	return nil, nil
 }
 

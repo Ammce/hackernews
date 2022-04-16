@@ -19,6 +19,7 @@ import (
 	"github.com/Ammce/hackernews/domain/article"
 	"github.com/Ammce/hackernews/domain/auth"
 	"github.com/Ammce/hackernews/domain/comment"
+	externalarticle "github.com/Ammce/hackernews/domain/externalArticle"
 	"github.com/Ammce/hackernews/domain/user"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -39,12 +40,14 @@ func graphqlHandler(db *sql.DB) gin.HandlerFunc {
 	authService := auth.NewAuthServiceImpl(userRepo)
 	articleService := article.NewArticleServiceImpl(articleRepo)
 	commentService := comment.NewCommentServiceImpl(commentRepo)
+	externalArticleService := externalarticle.NewExternalArticleServiceImpl()
 
 	domain := domainGraph.DomainGraphQL{
-		UserService:    userService,
-		AuthService:    authService,
-		ArticleService: articleService,
-		CommentService: commentService,
+		UserService:            userService,
+		AuthService:            authService,
+		ArticleService:         articleService,
+		CommentService:         commentService,
+		ExternalArticleService: externalArticleService,
 	}
 
 	c := generated.Config{Resolvers: &graph.Resolver{DB: db, Domain: domain, UserDataLoader: dataloaders.UserDataLoader(db), ArticleDataLoader: dataloaders.ArticleDataLoader(db), CommentDataLoader: dataloaders.CommentDataLoader(db)}}

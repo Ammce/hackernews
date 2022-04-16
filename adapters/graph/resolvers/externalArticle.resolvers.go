@@ -11,5 +11,11 @@ import (
 )
 
 func (r *queryResolver) GetTopArticlesPerCountry(ctx context.Context, country *string) ([]*models.ExternalArticle, error) {
-	panic(fmt.Errorf("not implemented"))
+	ct := "rs"
+	resp, err := r.Domain.ExternalArticleService.GetTopArticlesPerCountry(&ct)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("Response je", resp)
+	return nil, nil
 }
