@@ -1,0 +1,19 @@
+type ExternalArticleSource {
+  id: String
+  name: String
+}
+
+type ExternalArticle {
+  source: ExternalArticleSource
+  author: String
+  title: String
+  description: String
+  url: String
+  urlToImage: String
+  publishedAt: String
+  content: String
+}
+
+extend type Query {
+  getTopArticlesPerCountry(country: String): [ExternalArticle!]
+}

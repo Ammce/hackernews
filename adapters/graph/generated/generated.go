@@ -74,6 +74,22 @@ type ComplexityRoot struct {
 		Text        func(childComplexity int) int
 	}
 
+	ExternalArticle struct {
+		Author      func(childComplexity int) int
+		Content     func(childComplexity int) int
+		Description func(childComplexity int) int
+		PublishedAt func(childComplexity int) int
+		Source      func(childComplexity int) int
+		Title       func(childComplexity int) int
+		Url         func(childComplexity int) int
+		UrlToImage  func(childComplexity int) int
+	}
+
+	ExternalArticleSource struct {
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateArticle      func(childComplexity int, input inputs.ArticleInput) int
 		CreateComment      func(childComplexity int, input inputs.CommentInput) int
@@ -83,14 +99,15 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Article     func(childComplexity int, articleID string) int
-		Articles    func(childComplexity int, filter *inputs.ArticleFilterInput) int
-		Comment     func(childComplexity int, commentID string) int
-		Comments    func(childComplexity int) int
-		Healthcheck func(childComplexity int) int
-		Self        func(childComplexity int) int
-		User        func(childComplexity int, userID string) int
-		Users       func(childComplexity int) int
+		Article                  func(childComplexity int, articleID string) int
+		Articles                 func(childComplexity int, filter *inputs.ArticleFilterInput) int
+		Comment                  func(childComplexity int, commentID string) int
+		Comments                 func(childComplexity int) int
+		GetTopArticlesPerCountry func(childComplexity int, country *string) int
+		Healthcheck              func(childComplexity int) int
+		Self                     func(childComplexity int) int
+		User                     func(childComplexity int, userID string) int
+		Users                    func(childComplexity int) int
 	}
 
 	User struct {
@@ -128,6 +145,7 @@ type QueryResolver interface {
 	Articles(ctx context.Context, filter *inputs.ArticleFilterInput) ([]*models.Article, error)
 	Comment(ctx context.Context, commentID string) (*models.Comment, error)
 	Comments(ctx context.Context) ([]*models.Comment, error)
+	GetTopArticlesPerCountry(ctx context.Context, country *string) ([]*models.ExternalArticle, error)
 	User(ctx context.Context, userID string) (*models.User, error)
 	Self(ctx context.Context) (*models.User, error)
 	Users(ctx context.Context) ([]*models.User, error)
@@ -274,6 +292,76 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.Text(childComplexity), true
 
+	case "ExternalArticle.author":
+		if e.complexity.ExternalArticle.Author == nil {
+			break
+		}
+
+		return e.complexity.ExternalArticle.Author(childComplexity), true
+
+	case "ExternalArticle.content":
+		if e.complexity.ExternalArticle.Content == nil {
+			break
+		}
+
+		return e.complexity.ExternalArticle.Content(childComplexity), true
+
+	case "ExternalArticle.description":
+		if e.complexity.ExternalArticle.Description == nil {
+			break
+		}
+
+		return e.complexity.ExternalArticle.Description(childComplexity), true
+
+	case "ExternalArticle.publishedAt":
+		if e.complexity.ExternalArticle.PublishedAt == nil {
+			break
+		}
+
+		return e.complexity.ExternalArticle.PublishedAt(childComplexity), true
+
+	case "ExternalArticle.source":
+		if e.complexity.ExternalArticle.Source == nil {
+			break
+		}
+
+		return e.complexity.ExternalArticle.Source(childComplexity), true
+
+	case "ExternalArticle.title":
+		if e.complexity.ExternalArticle.Title == nil {
+			break
+		}
+
+		return e.complexity.ExternalArticle.Title(childComplexity), true
+
+	case "ExternalArticle.url":
+		if e.complexity.ExternalArticle.Url == nil {
+			break
+		}
+
+		return e.complexity.ExternalArticle.Url(childComplexity), true
+
+	case "ExternalArticle.urlToImage":
+		if e.complexity.ExternalArticle.UrlToImage == nil {
+			break
+		}
+
+		return e.complexity.ExternalArticle.UrlToImage(childComplexity), true
+
+	case "ExternalArticleSource.id":
+		if e.complexity.ExternalArticleSource.ID == nil {
+			break
+		}
+
+		return e.complexity.ExternalArticleSource.ID(childComplexity), true
+
+	case "ExternalArticleSource.name":
+		if e.complexity.ExternalArticleSource.Name == nil {
+			break
+		}
+
+		return e.complexity.ExternalArticleSource.Name(childComplexity), true
+
 	case "Mutation.createArticle":
 		if e.complexity.Mutation.CreateArticle == nil {
 			break
@@ -376,6 +464,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Comments(childComplexity), true
+
+	case "Query.getTopArticlesPerCountry":
+		if e.complexity.Query.GetTopArticlesPerCountry == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getTopArticlesPerCountry_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetTopArticlesPerCountry(childComplexity, args["country"].(*string)), true
 
 	case "Query.healthcheck":
 		if e.complexity.Query.Healthcheck == nil {
@@ -565,6 +665,26 @@ extend type Query {
 
 extend type Mutation {
   createComment(input: CommentInput!): Comment!
+}
+`, BuiltIn: false},
+	{Name: "adapters/graph/graphql/externalArticle.graphqls", Input: `type ExternalArticleSource {
+  id: String
+  name: String
+}
+
+type ExternalArticle {
+  source: ExternalArticleSource
+  author: String
+  title: String
+  description: String
+  url: String
+  urlToImage: String
+  publishedAt: String
+  content: String
+}
+
+extend type Query {
+  getTopArticlesPerCountry(country: String): [ExternalArticle!]
 }
 `, BuiltIn: false},
 	{Name: "adapters/graph/graphql/graphql.graphqls", Input: `directive @hasRoles(roles: [Role!]) on FIELD_DEFINITION
@@ -787,6 +907,21 @@ func (ec *executionContext) field_Query_comment_args(ctx context.Context, rawArg
 		}
 	}
 	args["commentId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getTopArticlesPerCountry_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["country"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("country"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["country"] = arg0
 	return args, nil
 }
 
@@ -1470,6 +1605,326 @@ func (ec *executionContext) _Comment_ipAddress(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _ExternalArticle_source(ctx context.Context, field graphql.CollectedField, obj *models.ExternalArticle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ExternalArticle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Source, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(models.ExternalArticleSource)
+	fc.Result = res
+	return ec.marshalOExternalArticleSource2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐExternalArticleSource(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExternalArticle_author(ctx context.Context, field graphql.CollectedField, obj *models.ExternalArticle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ExternalArticle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Author, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExternalArticle_title(ctx context.Context, field graphql.CollectedField, obj *models.ExternalArticle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ExternalArticle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExternalArticle_description(ctx context.Context, field graphql.CollectedField, obj *models.ExternalArticle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ExternalArticle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExternalArticle_url(ctx context.Context, field graphql.CollectedField, obj *models.ExternalArticle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ExternalArticle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Url, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExternalArticle_urlToImage(ctx context.Context, field graphql.CollectedField, obj *models.ExternalArticle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ExternalArticle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UrlToImage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExternalArticle_publishedAt(ctx context.Context, field graphql.CollectedField, obj *models.ExternalArticle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ExternalArticle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PublishedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExternalArticle_content(ctx context.Context, field graphql.CollectedField, obj *models.ExternalArticle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ExternalArticle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Content, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExternalArticleSource_id(ctx context.Context, field graphql.CollectedField, obj *models.ExternalArticleSource) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ExternalArticleSource",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExternalArticleSource_name(ctx context.Context, field graphql.CollectedField, obj *models.ExternalArticleSource) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ExternalArticleSource",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_healtcheckMutation(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1895,6 +2350,45 @@ func (ec *executionContext) _Query_comments(ctx context.Context, field graphql.C
 	res := resTmp.([]*models.Comment)
 	fc.Result = res
 	return ec.marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐCommentᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getTopArticlesPerCountry(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getTopArticlesPerCountry_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetTopArticlesPerCountry(rctx, args["country"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*models.ExternalArticle)
+	fc.Result = res
+	return ec.marshalOExternalArticle2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐExternalArticleᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4012,6 +4506,118 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var externalArticleImplementors = []string{"ExternalArticle"}
+
+func (ec *executionContext) _ExternalArticle(ctx context.Context, sel ast.SelectionSet, obj *models.ExternalArticle) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, externalArticleImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ExternalArticle")
+		case "source":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ExternalArticle_source(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "author":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ExternalArticle_author(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "title":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ExternalArticle_title(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "description":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ExternalArticle_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "url":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ExternalArticle_url(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "urlToImage":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ExternalArticle_urlToImage(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "publishedAt":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ExternalArticle_publishedAt(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "content":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ExternalArticle_content(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var externalArticleSourceImplementors = []string{"ExternalArticleSource"}
+
+func (ec *executionContext) _ExternalArticleSource(ctx context.Context, sel ast.SelectionSet, obj *models.ExternalArticleSource) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, externalArticleSourceImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ExternalArticleSource")
+		case "id":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ExternalArticleSource_id(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "name":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ExternalArticleSource_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -4207,6 +4813,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_comments(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "getTopArticlesPerCountry":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getTopArticlesPerCountry(ctx, field)
 				return res
 			}
 
@@ -4876,6 +5502,16 @@ func (ec *executionContext) unmarshalNCommentInput2githubᚗcomᚋAmmceᚋhacker
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNExternalArticle2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐExternalArticle(ctx context.Context, sel ast.SelectionSet, v *models.ExternalArticle) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ExternalArticle(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5316,6 +5952,57 @@ func (ec *executionContext) marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackern
 	return ret
 }
 
+func (ec *executionContext) marshalOExternalArticle2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐExternalArticleᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.ExternalArticle) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNExternalArticle2ᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐExternalArticle(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalOExternalArticleSource2githubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐExternalArticleSource(ctx context.Context, sel ast.SelectionSet, v models.ExternalArticleSource) graphql.Marshaler {
+	return ec._ExternalArticleSource(ctx, sel, &v)
+}
+
 func (ec *executionContext) unmarshalORole2ᚕgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐRoleᚄ(ctx context.Context, v interface{}) ([]models.Role, error) {
 	if v == nil {
 		return nil, nil
@@ -5381,6 +6068,16 @@ func (ec *executionContext) marshalORole2ᚕgithubᚗcomᚋAmmceᚋhackernewsᚋ
 	}
 
 	return ret
+}
+
+func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
