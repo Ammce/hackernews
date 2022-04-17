@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	externalArticle "github.com/Ammce/hackernews/domain/externalArticle"
 )
@@ -19,7 +20,8 @@ type Response struct {
 }
 
 func (n NewsApi) GetTopArticlesPerCountry(country *string) ([]*externalArticle.ExternalArticle, error) {
-	url := fmt.Sprintf("https://newsapi.org/v2/top-headlines?country=%s&apiKey=4bd0597f548c4f279483863901d721c3", *country)
+	token := os.Getenv("NEWS_API_KEY")
+	url := fmt.Sprintf("https://newsapi.org/v2/top-headlines?country=%s&apiKey=%s", *country, token)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
