@@ -11,8 +11,7 @@ import (
 )
 
 func (r *queryResolver) GetTopArticlesPerCountry(ctx context.Context, country *string) ([]*models.ExternalArticle, error) {
-	ct := "rs"
-	resp, err := r.Domain.ExternalArticleService.GetTopArticlesPerCountry(&ct)
+	resp, err := r.Domain.ExternalArticleService.GetTopArticlesPerCountry(country)
 	if err != nil {
 		return nil, err
 	}
