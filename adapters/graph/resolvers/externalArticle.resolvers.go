@@ -5,8 +5,8 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/Ammce/hackernews/adapters/graph/mappers"
 	"github.com/Ammce/hackernews/adapters/graph/models"
 )
 
@@ -16,6 +16,12 @@ func (r *queryResolver) GetTopArticlesPerCountry(ctx context.Context, country *s
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Response je", resp)
-	return nil, nil
+
+	var externalArticlesGraphQL []*models.ExternalArticle
+	for _, ea := range resp {
+		mappedEa := mappers.ExternalArticleDomainToExternalArticleGraphQL(ea)
+		externalArticlesGraphQL = append(externalArticlesGraphQL, mappedEa)
+	}
+
+	return externalArticlesGraphQL, nil
 }

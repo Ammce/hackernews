@@ -1,11 +1,17 @@
 package externalarticle
 
-type ExternalArticleServiceImpl struct{}
-
-func (ea ExternalArticleServiceImpl) GetTopArticlesPerCountry(country *string) ([]*ExternalArticle, error) {
-	return nil, nil
+type ExternalArticleServiceImpl struct {
+	ExternalArticleRepo ExternalArticleRepository
 }
 
-func NewExternalArticleServiceImpl() ExternalArticleServiceImpl {
-	return ExternalArticleServiceImpl{}
+func (ea ExternalArticleServiceImpl) GetTopArticlesPerCountry(country *string) ([]*ExternalArticle, error) {
+	topArticlesPerCountry, err := ea.ExternalArticleRepo.GetTopArticlesPerCountry(country)
+	if err != nil {
+		return nil, err
+	}
+	return topArticlesPerCountry, nil
+}
+
+func NewExternalArticleServiceImpl(ear ExternalArticleRepository) ExternalArticleServiceImpl {
+	return ExternalArticleServiceImpl{ExternalArticleRepo: ear}
 }

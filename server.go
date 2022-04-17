@@ -9,6 +9,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	newsapiRepo "github.com/Ammce/hackernews/adapters/clients/newsapi"
 	domainGraph "github.com/Ammce/hackernews/adapters/graph"
 	"github.com/Ammce/hackernews/adapters/graph/directives"
 	"github.com/Ammce/hackernews/adapters/graph/generated"
@@ -35,12 +36,13 @@ func graphqlHandler(db *sql.DB) gin.HandlerFunc {
 	userRepo := repositories.NewUserRepositoryImpl(db)
 	articleRepo := repositories.NewArticleRepositoryImpl(db)
 	commentRepo := repositories.NewCommentRepositoryImpl(db)
+	externalArticleRepo := newsapiRepo.NewNewsApi()
 
 	userService := user.NewUserServiceImpl(userRepo)
 	authService := auth.NewAuthServiceImpl(userRepo)
 	articleService := article.NewArticleServiceImpl(articleRepo)
 	commentService := comment.NewCommentServiceImpl(commentRepo)
-	externalArticleService := externalarticle.NewExternalArticleServiceImpl()
+	externalArticleService := externalarticle.NewExternalArticleServiceImpl(externalArticleRepo)
 
 	domain := domainGraph.DomainGraphQL{
 		UserService:            userService,
