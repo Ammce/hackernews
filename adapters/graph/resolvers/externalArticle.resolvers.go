@@ -11,7 +11,7 @@ import (
 	"github.com/Ammce/hackernews/adapters/graph/models"
 )
 
-func (r *queryResolver) GetTopArticlesPerCountry(ctx context.Context, country *string) ([]*models.ExternalArticle, error) {
+func (r *queryResolver) GetTopExternalArticlesByCountry(ctx context.Context, country *string) ([]*models.ExternalArticle, error) {
 	resp, err := r.Domain.ExternalArticleService.GetTopArticlesPerCountry(country)
 	if err != nil {
 		return nil, err

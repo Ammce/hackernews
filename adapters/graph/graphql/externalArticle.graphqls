@@ -20,6 +20,6 @@ type ExternalArticlesByTopic {
 }
 
 extend type Query {
-  getTopArticlesPerCountry(country: String): [ExternalArticle!]
+  getTopExternalArticlesByCountry(country: String): [ExternalArticle!]
   getExternalArticlesByTopics(topics: [String!]): [ExternalArticlesByTopic!]
 }

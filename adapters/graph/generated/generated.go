@@ -104,16 +104,16 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Article                     func(childComplexity int, articleID string) int
-		Articles                    func(childComplexity int, filter *inputs.ArticleFilterInput) int
-		Comment                     func(childComplexity int, commentID string) int
-		Comments                    func(childComplexity int) int
-		GetExternalArticlesByTopics func(childComplexity int, topics []string) int
-		GetTopArticlesPerCountry    func(childComplexity int, country *string) int
-		Healthcheck                 func(childComplexity int) int
-		Self                        func(childComplexity int) int
-		User                        func(childComplexity int, userID string) int
-		Users                       func(childComplexity int) int
+		Article                         func(childComplexity int, articleID string) int
+		Articles                        func(childComplexity int, filter *inputs.ArticleFilterInput) int
+		Comment                         func(childComplexity int, commentID string) int
+		Comments                        func(childComplexity int) int
+		GetExternalArticlesByTopics     func(childComplexity int, topics []string) int
+		GetTopExternalArticlesByCountry func(childComplexity int, country *string) int
+		Healthcheck                     func(childComplexity int) int
+		Self                            func(childComplexity int) int
+		User                            func(childComplexity int, userID string) int
+		Users                           func(childComplexity int) int
 	}
 
 	User struct {
@@ -151,7 +151,7 @@ type QueryResolver interface {
 	Articles(ctx context.Context, filter *inputs.ArticleFilterInput) ([]*models.Article, error)
 	Comment(ctx context.Context, commentID string) (*models.Comment, error)
 	Comments(ctx context.Context) ([]*models.Comment, error)
-	GetTopArticlesPerCountry(ctx context.Context, country *string) ([]*models.ExternalArticle, error)
+	GetTopExternalArticlesByCountry(ctx context.Context, country *string) ([]*models.ExternalArticle, error)
 	GetExternalArticlesByTopics(ctx context.Context, topics []string) ([]*models.ExternalArticlesByTopic, error)
 	User(ctx context.Context, userID string) (*models.User, error)
 	Self(ctx context.Context) (*models.User, error)
@@ -498,17 +498,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetExternalArticlesByTopics(childComplexity, args["topics"].([]string)), true
 
-	case "Query.getTopArticlesPerCountry":
-		if e.complexity.Query.GetTopArticlesPerCountry == nil {
+	case "Query.getTopExternalArticlesByCountry":
+		if e.complexity.Query.GetTopExternalArticlesByCountry == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getTopArticlesPerCountry_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_getTopExternalArticlesByCountry_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetTopArticlesPerCountry(childComplexity, args["country"].(*string)), true
+		return e.complexity.Query.GetTopExternalArticlesByCountry(childComplexity, args["country"].(*string)), true
 
 	case "Query.healthcheck":
 		if e.complexity.Query.Healthcheck == nil {
@@ -722,7 +722,7 @@ type ExternalArticlesByTopic {
 }
 
 extend type Query {
-  getTopArticlesPerCountry(country: String): [ExternalArticle!]
+  getTopExternalArticlesByCountry(country: String): [ExternalArticle!]
   getExternalArticlesByTopics(topics: [String!]): [ExternalArticlesByTopic!]
 }
 `, BuiltIn: false},
@@ -964,7 +964,7 @@ func (ec *executionContext) field_Query_getExternalArticlesByTopics_args(ctx con
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getTopArticlesPerCountry_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_getTopExternalArticlesByCountry_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -2473,7 +2473,7 @@ func (ec *executionContext) _Query_comments(ctx context.Context, field graphql.C
 	return ec.marshalOComment2ᚕᚖgithubᚗcomᚋAmmceᚋhackernewsᚋadaptersᚋgraphᚋmodelsᚐCommentᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getTopArticlesPerCountry(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getTopExternalArticlesByCountry(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2490,7 +2490,7 @@ func (ec *executionContext) _Query_getTopArticlesPerCountry(ctx context.Context,
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getTopArticlesPerCountry_args(ctx, rawArgs)
+	args, err := ec.field_Query_getTopExternalArticlesByCountry_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -2498,7 +2498,7 @@ func (ec *executionContext) _Query_getTopArticlesPerCountry(ctx context.Context,
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetTopArticlesPerCountry(rctx, args["country"].(*string))
+		return ec.resolvers.Query().GetTopExternalArticlesByCountry(rctx, args["country"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5021,7 +5021,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "getTopArticlesPerCountry":
+		case "getTopExternalArticlesByCountry":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -5030,7 +5030,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getTopArticlesPerCountry(ctx, field)
+				res = ec._Query_getTopExternalArticlesByCountry(ctx, field)
 				return res
 			}
 
