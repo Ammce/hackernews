@@ -15,3 +15,8 @@ type ExternalArticle struct {
 	PublishedAt string
 	Content     string
 }
+
+type ExternalArticlesByTopic struct {
+	Topic    string
+	Articles []ExternalArticle
+}

@@ -5,14 +5,13 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Ammce/hackernews/adapters/graph/mappers"
 	"github.com/Ammce/hackernews/adapters/graph/models"
 )
 
 func (r *queryResolver) GetTopExternalArticlesByCountry(ctx context.Context, country *string) ([]*models.ExternalArticle, error) {
-	resp, err := r.Domain.ExternalArticleService.GetTopArticlesPerCountry(country)
+	resp, err := r.Domain.ExternalArticleService.GetTopExternalArticlesPerCountry(country)
 	if err != nil {
 		return nil, err
 	}
@@ -27,5 +26,10 @@ func (r *queryResolver) GetTopExternalArticlesByCountry(ctx context.Context, cou
 }
 
 func (r *queryResolver) GetExternalArticlesByTopics(ctx context.Context, topics []string) ([]*models.ExternalArticlesByTopic, error) {
-	panic(fmt.Errorf("not implemented"))
+	// TODO - Create response mapper
+	_, err := r.Domain.ExternalArticleService.GetExternalArticlesByTopics(topics)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
 }

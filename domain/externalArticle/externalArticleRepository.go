@@ -1,5 +1,6 @@
 package externalarticle
 
 type ExternalArticleRepository interface {
-	GetTopArticlesPerCountry(country *string) ([]*ExternalArticle, error)
+	GetTopExternalArticlesPerCountry(country *string) ([]*ExternalArticle, error)
+	GetExternalArticlesByTopics(topics []string) ([]*ExternalArticlesByTopic, error)
 }
