@@ -38,14 +38,14 @@ func (n NewsApi) GetTopArticlesPerCountry(country *string) ([]*externalArticle.E
 	if err3 != nil {
 		fmt.Println("Error unmarshalling")
 	}
-	var toMap []*externalArticle.ExternalArticle
+	var externalArticles []*externalArticle.ExternalArticle
 
 	for _, asd := range response.Articles {
 		newAr := asd
-		toMap = append(toMap, &newAr)
+		externalArticles = append(externalArticles, &newAr)
 	}
 
-	return toMap, nil
+	return externalArticles, nil
 }
 
 func NewNewsApi() NewsApi {
