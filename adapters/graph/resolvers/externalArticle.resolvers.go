@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Ammce/hackernews/adapters/graph/mappers"
 	"github.com/Ammce/hackernews/adapters/graph/models"
@@ -23,4 +24,8 @@ func (r *queryResolver) GetTopArticlesPerCountry(ctx context.Context, country *s
 	}
 
 	return externalArticlesGraphQL, nil
+}
+
+func (r *queryResolver) GetExternalArticlesByTopics(ctx context.Context, topics []string) ([]*models.ExternalArticlesByTopic, error) {
+	panic(fmt.Errorf("not implemented"))
 }

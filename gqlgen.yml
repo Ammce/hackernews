@@ -67,6 +67,8 @@ models:
     model: github.com/Ammce/hackernews/adapters/graph/models.Article
   ExternalArticle:
     model: github.com/Ammce/hackernews/adapters/graph/models.ExternalArticle
+  ExternalArticlesByTopic:
+    model: github.com/Ammce/hackernews/adapters/graph/models.ExternalArticlesByTopic
   ExternalArticleSource:
     model: github.com/Ammce/hackernews/adapters/graph/models.ExternalArticleSource
   ArticleInput:

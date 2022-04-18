@@ -15,3 +15,8 @@ type ExternalArticle struct {
 	PublishedAt string                `json:"publishedAt"`
 	Content     string                `json:"content"`
 }
+
+type ExternalArticlesByTopic struct {
+	Topic    string            `json:"topic"`
+	Articles []ExternalArticle `json:"articles"`
+}

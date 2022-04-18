@@ -14,6 +14,12 @@ type ExternalArticle {
   content: String
 }
 
+type ExternalArticlesByTopic {
+  topic: String!
+  articles: [ExternalArticle!]
+}
+
 extend type Query {
   getTopArticlesPerCountry(country: String): [ExternalArticle!]
+  getExternalArticlesByTopics(topics: [String!]): [ExternalArticlesByTopic!]
 }
