@@ -16,20 +16,14 @@ func (r *queryResolver) GetTopExternalArticlesByCountry(ctx context.Context, cou
 		return nil, err
 	}
 
-	var externalArticlesGraphQL []*models.ExternalArticle
-	for _, ea := range resp {
-		mappedEa := mappers.ExternalArticleDomainToExternalArticleGraphQL(ea)
-		externalArticlesGraphQL = append(externalArticlesGraphQL, mappedEa)
-	}
-
-	return externalArticlesGraphQL, nil
+	return mappers.ExternalArticlesDomainToExternalArticlesGraphQL(resp), nil
 }
 
 func (r *queryResolver) GetExternalArticlesByTopics(ctx context.Context, topics []string) ([]*models.ExternalArticlesByTopic, error) {
-	// TODO - Create response mapper
-	_, err := r.Domain.ExternalArticleService.GetExternalArticlesByTopics(topics)
+	externalArticlesByTopicDomain, err := r.Domain.ExternalArticleService.GetExternalArticlesByTopics(topics)
+	externalArticlesByTopicGraphQL := mappers.ExternalArticlesByTopicDomainToExternalArticleByTopicGraphQL(externalArticlesByTopicDomain)
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return externalArticlesByTopicGraphQL, nil
 }

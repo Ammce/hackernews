@@ -20,8 +20,50 @@ type Response struct {
 }
 
 func (n NewsApi) GetExternalArticlesByTopics(topics []string) ([]*externalArticle.ExternalArticlesByTopic, error) {
-	//TODO - Call len(topics) amount of Go routines to access the data from different media. Use channels
-	return nil, nil
+	var externalArticlesByTopic []*externalArticle.ExternalArticlesByTopic
+
+	eaChan := make(chan externalArticle.ExternalArticlesByTopic, len(topics))
+
+	for _, topic := range topics {
+		go getArticlesByTopic(topic, eaChan)
+	}
+
+	// TODO - work this out using sync group
+	data := <-eaChan
+	data1 := <-eaChan
+	externalArticlesByTopic = append(externalArticlesByTopic, &data, &data1)
+
+	// for externalArticleByTopic := range eaChan {
+	// 	externalArticlesByTopic = append(externalArticlesByTopic, &externalArticleByTopic)
+	// }
+
+	return externalArticlesByTopic, nil
+}
+
+func getArticlesByTopic(topic string, ch chan externalArticle.ExternalArticlesByTopic) {
+
+	token := os.Getenv("NEWS_API_KEY")
+	url := fmt.Sprintf("https://newsapi.org/v2/everything?q=%s&apiKey=%s", topic, token)
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	//Convert the body to type string
+	var response = new(Response)
+	sb := string(body)
+	err3 := json.Unmarshal([]byte(sb), &response)
+	if err3 != nil {
+		fmt.Println("Error unmarshalling")
+	}
+
+	ch <- externalArticle.ExternalArticlesByTopic{
+		Topic:    topic,
+		Articles: response.Articles,
+	}
 }
 
 func (n NewsApi) GetTopExternalArticlesPerCountry(country *string) ([]*externalArticle.ExternalArticle, error) {

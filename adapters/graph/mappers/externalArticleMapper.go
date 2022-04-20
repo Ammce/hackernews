@@ -17,3 +17,26 @@ func ExternalArticleDomainToExternalArticleGraphQL(externalArticleDomain *extern
 		PublishedAt: externalArticleDomain.PublishedAt,
 	}
 }
+
+func ExternalArticlesDomainToExternalArticlesGraphQL(externalArticlesDomain []*externalarticle.ExternalArticle) []*models.ExternalArticle {
+	var externalArticlesGraphQL []*models.ExternalArticle
+	for _, ea := range externalArticlesDomain {
+		mappedEa := ExternalArticleDomainToExternalArticleGraphQL(ea)
+		externalArticlesGraphQL = append(externalArticlesGraphQL, mappedEa)
+	}
+	return externalArticlesGraphQL
+}
+
+func ExternalArticlesByTopicDomainToExternalArticleByTopicGraphQL(externalArticlesByTopicDomain []*externalarticle.ExternalArticlesByTopic) []*models.ExternalArticlesByTopic {
+
+	var externalArticlesByTopicGraphQL []*models.ExternalArticlesByTopic
+
+	for _, eaDomain := range externalArticlesByTopicDomain {
+		ea := models.ExternalArticlesByTopic{
+			Topic: eaDomain.Topic,
+		}
+		externalArticlesByTopicGraphQL = append(externalArticlesByTopicGraphQL, &ea)
+	}
+
+	return externalArticlesByTopicGraphQL
+}
