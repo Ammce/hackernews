@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 
 	externalArticle "github.com/Ammce/hackernews/domain/externalArticle"
 )
@@ -23,25 +24,29 @@ func (n NewsApi) GetExternalArticlesByTopics(topics []string) ([]*externalArticl
 	var externalArticlesByTopic []*externalArticle.ExternalArticlesByTopic
 
 	eaChan := make(chan externalArticle.ExternalArticlesByTopic, len(topics))
+	wg := sync.WaitGroup{}
 
+	wg.Add(len(topics))
 	for _, topic := range topics {
-		go getArticlesByTopic(topic, eaChan)
+		go getArticlesByTopic(topic, eaChan, &wg)
 	}
 
-	// TODO - work this out using sync group
-	data := <-eaChan
-	data1 := <-eaChan
-	externalArticlesByTopic = append(externalArticlesByTopic, &data, &data1)
+	go func() {
+		defer close(eaChan)
+		wg.Wait()
+	}()
 
-	// for externalArticleByTopic := range eaChan {
-	// 	externalArticlesByTopic = append(externalArticlesByTopic, &externalArticleByTopic)
-	// }
+	for externalArticleByTopic := range eaChan {
+		eabt := externalArticleByTopic
+		externalArticlesByTopic = append(externalArticlesByTopic, &eabt)
+	}
 
 	return externalArticlesByTopic, nil
 }
 
-func getArticlesByTopic(topic string, ch chan externalArticle.ExternalArticlesByTopic) {
+func getArticlesByTopic(topic string, ch chan externalArticle.ExternalArticlesByTopic, wg *sync.WaitGroup) {
 
+	defer wg.Done()
 	token := os.Getenv("NEWS_API_KEY")
 	url := fmt.Sprintf("https://newsapi.org/v2/everything?q=%s&apiKey=%s", topic, token)
 	resp, err := http.Get(url)

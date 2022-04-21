@@ -1,8 +1,6 @@
 package mappers
 
 import (
-	"fmt"
-
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	externalarticle "github.com/Ammce/hackernews/domain/externalArticle"
 )
@@ -34,7 +32,6 @@ func ExternalArticlesByTopicDomainToExternalArticleByTopicGraphQL(externalArticl
 	var externalArticlesByTopicGraphQL []*models.ExternalArticlesByTopic
 
 	for _, eaDomain := range externalArticlesByTopicDomain {
-		fmt.Println(eaDomain.Articles)
 		var externalArticles []models.ExternalArticle
 		for _, eaDomainArticle := range eaDomain.Articles {
 			art := models.ExternalArticle{
