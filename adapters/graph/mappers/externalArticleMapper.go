@@ -1,6 +1,8 @@
 package mappers
 
 import (
+	"fmt"
+
 	"github.com/Ammce/hackernews/adapters/graph/models"
 	externalarticle "github.com/Ammce/hackernews/domain/externalArticle"
 )
@@ -32,8 +34,23 @@ func ExternalArticlesByTopicDomainToExternalArticleByTopicGraphQL(externalArticl
 	var externalArticlesByTopicGraphQL []*models.ExternalArticlesByTopic
 
 	for _, eaDomain := range externalArticlesByTopicDomain {
+		fmt.Println(eaDomain.Articles)
+		var externalArticles []models.ExternalArticle
+		for _, eaDomainArticle := range eaDomain.Articles {
+			art := models.ExternalArticle{
+				Title:       eaDomainArticle.Title,
+				Description: eaDomainArticle.Description,
+				Author:      eaDomainArticle.Author,
+				Url:         eaDomainArticle.Url,
+				UrlToImage:  eaDomainArticle.UrlToImage,
+				Source:      models.ExternalArticleSource(eaDomainArticle.Source),
+				PublishedAt: eaDomainArticle.PublishedAt,
+			}
+			externalArticles = append(externalArticles, art)
+		}
 		ea := models.ExternalArticlesByTopic{
-			Topic: eaDomain.Topic,
+			Topic:    eaDomain.Topic,
+			Articles: externalArticles,
 		}
 		externalArticlesByTopicGraphQL = append(externalArticlesByTopicGraphQL, &ea)
 	}
